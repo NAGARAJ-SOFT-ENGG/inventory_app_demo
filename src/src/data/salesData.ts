@@ -1,0 +1,62 @@
+import { Sale } from "../models/sale.model";
+
+export const mockSales: Sale[] = [
+  {
+    id: "sale-001",
+    invoiceNumber: "INV-2025-001",
+    customerName: "John Smith",
+    customerEmail: "john@example.com",
+    customerPhone: "+1 234 567 8900",
+    items: [
+      {
+        id: "item-1",
+        productId: "prod-001",
+        productName: "Laptop Computer",
+        quantity: 2,
+        unitPrice: 1299.99,
+        total: 2599.98,
+      },
+      {
+        id: "item-2",
+        productId: "prod-003",
+        productName: "Wireless Mouse",
+        quantity: 5,
+        unitPrice: 29.99,
+        total: 149.95,
+      },
+    ],
+    subtotal: 2749.93,
+    tax: 274.99,
+    discount: 50.0,
+    total: 2974.92,
+    paymentMethod: "card",
+    paymentStatus: "paid",
+    saleDate: "2025-11-15T10:30:00Z",
+    createdBy: "Admin User",
+  },
+  {
+    id: "sale-002",
+    invoiceNumber: "INV-2025-002",
+    customerName: "Jane Doe",
+    customerEmail: "jane@example.com",
+    customerPhone: "+1 234 567 8901",
+    items: [
+      {
+        id: "item-3",
+        productId: "prod-002",
+        productName: "Office Chair",
+        quantity: 3,
+        unitPrice: 249.99,
+        total: 749.97,
+      },
+    ],
+    subtotal: 749.97,
+    tax: 75.0,
+    discount: 0,
+    total: 824.97,
+    paymentMethod: "cash",
+    paymentStatus: "paid",
+    saleDate: "2025-11-14T14:20:00Z",
+    createdBy: "Sales Team",
+  },
+];
