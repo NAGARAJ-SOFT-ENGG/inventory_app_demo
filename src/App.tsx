@@ -19,7 +19,12 @@ import { Suppliers } from "./src/pages/Suppliers";
 import { Employees } from "./src/pages/Employees";
 import { Users } from "./src/pages/Users";
 import { StockMovements } from "./src/pages/StockMovements";
-import { Toaster } from "sonner@2.0.3";
+import { Toaster } from "sonner";
+import POScreen from './src/pages/POScreen'; // Assuming this import path
+import { ItemMasterPage } from "./src/pages/ItemMasterPage";
+import { SupplierMasterPage } from "./src/pages/SupplierMasterPage";
+import { PriceMasterPage } from "./src/pages/PriceMasterPage";
+import { QtyMasterPage } from "./src/pages/QtyMasterPage";
 
 const App: React.FC = () => {
   return (
@@ -67,6 +72,8 @@ const AppRoutes: React.FC = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="products" element={<Products />} />
         <Route path="inventory" element={<Inventory />} />
+        {/* <Route path="inventory" element={<Inventory />} /> */}
+        <Route path="/po-screen" element={<POScreen />} />
         <Route path="sales" element={<Sales />} />
         <Route path="orders" element={<Orders />} />
         <Route
@@ -109,9 +116,42 @@ const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        {/* Master Menu Routes */}
+        <Route
+          path="masters/items"
+          element={
+            <ProtectedRoute requireAdmin>
+              <ItemMasterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="masters/suppliers"
+          element={
+            <ProtectedRoute requireAdmin>
+              <SupplierMasterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="masters/prices"
+          element={
+            <ProtectedRoute requireAdmin>
+              <PriceMasterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="masters/quantities"
+          element={
+            <ProtectedRoute requireAdmin>
+              <QtyMasterPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };

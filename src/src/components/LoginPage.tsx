@@ -1,320 +1,289 @@
 import React, { useState, useContext } from "react";
-import { motion } from "motion/react";
-import { Package, Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import { AuthService } from "../services/auth.service";
-import { toast } from "sonner@2.0.3";
-import { Switch } from "../../components/ui/switch";
-import { Label } from "../../components/ui/label";
-
-interface FormErrors {
-  email?: string;
-  password?: string;
-}
+import { Loader2 } from "lucide-react";
 
 export const LoginPage: React.FC = () => {
+  const [isSignIn, setIsSignIn] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
-  const [lampPulled, setLampPulled] = useState<boolean>(false);
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+  // Form states
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
-    // Email validation
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    // Password validation
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error("Please fix the validation errors");
-      return;
-    }
-
+    setError("");
     setIsLoading(true);
 
     try {
-      const response = await AuthService.signIn(email, password);
-      login(response.user, response.token);
-      toast.success(`Welcome back, ${response.user.name}!`);
-    } catch (error) {
-      toast.error("Invalid credentials. Please try again.");
-      console.error("Login error:", error);
+      if (isSignIn) {
+        const response = await AuthService.signIn(email, password);
+        login(response.user, response.token);
+      } else {
+        const response = await AuthService.signUp(email, password, name);
+        login(response.user, response.token);
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleLampPull = (): void => {
-    setLampPulled(!lampPulled);
-    setIsAdminMode(!isAdminMode);
-  };
-
-  const clearError = (field: keyof FormErrors): void => {
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
+  const toggleMode = () => {
+    setIsSignIn(!isSignIn);
+    setError("");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4 overflow-hidden relative">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
+        <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -bottom-48 -right-48 animate-pulse delay-1000"></div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
-          {/* Night Lamp */}
-          <div className="flex flex-col items-center mb-8">
+      <div className="relative z-10 w-full max-w-md">
+        {/* Night Lamp */}
+        <motion.div
+          className="mb-8 flex flex-col items-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          {/* Lamp shade and bulb */}
+          <div className="relative">
+            {/* Hanging cord */}
             <motion.div
-              className="relative cursor-pointer"
-              onClick={handleLampPull}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="w-1 bg-gradient-to-b from-gray-400 to-gray-600 mx-auto"
+              style={{ height: "60px" }}
+              animate={{ scaleY: [1, 0.98, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+
+{/* Pull rope with toggle */}
+<motion.div
+  className="absolute cursor-pointer select-none"
+  style={{ top: "20px", left: "calc(50% + 70px)" }}  // SHIFT RIGHT BY 100px
+  whileHover={{ scale: 1.15, rotate: -3 }}
+  whileTap={{ scale: 0.9, y: 10 }} // small pull-down effect
+  animate={{ y: [0, 3, 0] }}
+  transition={{ duration: 1.8, repeat: Infinity }}
+  onClick={toggleMode}  // ← FIX: toggle light
+>
+  {/* Rope line */}
+  <div
+    className="w-1.5 mx-auto bg-gradient-to-b from-gray-200 to-gray-500 shadow-md"
+    style={{ height: "40px", borderRadius: "4px" }}
+  />
+
+  {/* Rope handle */}
+  <motion.div
+    className="w-2 h-12 mx-auto rounded-full border-2 bg-gradient-to-b 
+               from-gray-300 to-gray-500 border-gray-700 shadow-xl"
+    animate={{
+      boxShadow: [
+        "0 0 6px rgba(255,255,255,0.2)",
+        "0 0 14px rgba(255,255,255,0.35)",
+        "0 0 6px rgba(255,255,255,0.2)",
+      ],
+    }}
+    transition={{ duration: 2, repeat: Infinity }}
+  />
+</motion.div>
+
+
+            {/* Lamp shade */}
+            <motion.div
+              className="mt-3 w-32 h-20 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-full relative overflow-hidden border-4 border-gray-600"
+              style={{
+                clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
+              }}
             >
-              {/* Lamp Bulb */}
+              {/* Light glow effect */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isSignIn ? "signin" : "signup"}
+                  className={`absolute inset-0 ${isSignIn ? "bg-yellow-600/20" : "bg-blue-600/20"
+                    } blur-xl`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                />
+              </AnimatePresence>
+
+              {/* Bulb */}
               <motion.div
-                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  lampPulled
-                    ? "bg-gradient-to-br from-yellow-400 to-orange-500 shadow-2xl shadow-yellow-500/50"
-                    : "bg-gradient-to-br from-blue-500 to-purple-600 shadow-2xl shadow-blue-500/50"
-                }`}
+                className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-10 rounded-full ${isSignIn ? "bg-yellow-300" : "bg-blue-300"
+                  }`}
                 animate={{
-                  boxShadow: lampPulled
+                  boxShadow: isSignIn
                     ? [
-                        "0 0 20px rgba(251, 191, 36, 0.5)",
-                        "0 0 40px rgba(251, 191, 36, 0.8)",
-                        "0 0 20px rgba(251, 191, 36, 0.5)",
-                      ]
+                      "0 0 20px rgba(253, 224, 71, 0.8)",
+                      "0 0 30px rgba(253, 224, 71, 0.6)",
+                      "0 0 20px rgba(253, 224, 71, 0.8)",
+                    ]
                     : [
-                        "0 0 20px rgba(59, 130, 246, 0.5)",
-                        "0 0 40px rgba(59, 130, 246, 0.8)",
-                        "0 0 20px rgba(59, 130, 246, 0.5)",
-                      ],
-                  transition: { duration: 2, repeat: Infinity },
+                      "0 0 20px rgba(147, 197, 253, 0.8)",
+                      "0 0 30px rgba(147, 197, 253, 0.6)",
+                      "0 0 20px rgba(147, 197, 253, 0.8)",
+                    ],
                 }}
-              >
-                <Package className="w-10 h-10 text-white" />
-              </motion.div>
-
-              {/* Lamp Rope */}
-              <motion.div
-                className="absolute top-full left-1/2 -translate-x-1/2 w-1 bg-gradient-to-b from-gray-400 to-gray-600"
-                style={{ height: "40px" }}
-                animate={{ height: lampPulled ? "50px" : "40px" }}
-                transition={{ duration: 0.3 }}
-              />
-
-              {/* Rope Handle */}
-              <motion.div
-                className="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-600 border-2 border-gray-400"
-                style={{ top: "100px" }}
-                animate={{ top: lampPulled ? "110px" : "100px" }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 2, repeat: Infinity }}
               />
             </motion.div>
 
-            <motion.p
-              className="mt-6 text-white/80 text-sm text-center"
-              animate={{ opacity: [0.6, 1, 0.6] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              Pull the lamp to switch mode
-            </motion.p>
-          </div>
-
-          {/* Logo and Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl text-white mb-2">
-              InvenTrack
-            </h1>
-            <p className="text-white/60">
-              {isAdminMode ? "Administrator Login" : "Customer Login"}
-            </p>
-          </div>
-
-          {/* Mode Switch */}
-          <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-white/5 rounded-xl">
-            <Label htmlFor="mode-switch" className="text-white/80">
-              Customer
-            </Label>
-            <Switch
-              id="mode-switch"
-              checked={isAdminMode}
-              onCheckedChange={(checked: boolean) => {
-                setIsAdminMode(checked);
-                setLampPulled(checked);
+            {/* Light beam */}
+            <motion.div
+              className="absolute top-full left-1/2 -translate-x-1/2 w-48 h-96 pointer-events-none"
+              style={{
+                background: isSignIn
+                  ? "linear-gradient(180deg, rgba(253, 224, 71, 0.3) 0%, transparent 70%)"
+                  : "linear-gradient(180deg, rgba(147, 197, 253, 0.3) 0%, transparent 70%)",
+                clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
               }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
             />
-            <Label htmlFor="mode-switch" className="text-white/80">
-              Admin
-            </Label>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/90">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none z-10" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setEmail(e.target.value);
-                    clearError("email");
-                  }}
-                  className={`w-full pl-10 pr-10 py-3 bg-white/10 border ${
-                    errors.email
-                      ? "border-red-500 ring-1 ring-red-500"
-                      : "border-white/20"
-                  } rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 transition-all`}
-                  placeholder="Enter your email"
-                />
-                {errors.email && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <AlertCircle className="w-5 h-5 text-red-500" />
-                  </div>
-                )}
-              </div>
-              {errors.email && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-red-400 text-sm flex items-center gap-1"
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.email}
-                </motion.p>
-              )}
-            </div>
+          {/* Mode indicator text */}
+          <motion.p
+            className="mt-24 text-white/80 text-sm"
+            key={isSignIn ? "signin-text" : "signup-text"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            Pull the rope to switch to {isSignIn ? "Sign Up" : "Sign In"}
+          </motion.p>
+        </motion.div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/90">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none z-10" />
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setPassword(e.target.value);
-                    clearError("password");
-                  }}
-                  className={`w-full pl-10 pr-10 py-3 bg-white/10 border ${
-                    errors.password
-                      ? "border-red-500 ring-1 ring-red-500"
-                      : "border-white/20"
-                  } rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 transition-all`}
-                  placeholder="Enter your password"
-                />
-                {errors.password && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <AlertCircle className="w-5 h-5 text-red-500" />
-                  </div>
-                )}
-              </div>
-              {errors.password && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-red-400 text-sm flex items-center gap-1"
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.password}
-                </motion.p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 rounded-lg transition-all flex items-center justify-center gap-2 ${
-                lampPulled
-                  ? "bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700"
-                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              } text-white shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed`}
+        {/* Form Card */}
+        <motion.div
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isSignIn ? "signin-form" : "signup-form"}
+              initial={{ opacity: 0, x: isSignIn ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isSignIn ? 20 : -20 }}
+              transition={{ duration: 0.3 }}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <span>Sign In</span>
+              <h2 className="text-3xl text-white mb-2 text-center">
+                {isSignIn ? "Welcome Back" : "Create Account"}
+              </h2>
+              <p className="text-white/60 text-center mb-6 text-sm">
+                {isSignIn
+                  ? "Sign in to access your inventory"
+                  : "Sign up to get started"}
+              </p>
+
+              {error && (
+                <motion.div
+                  className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-4 text-sm"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {error}
+                </motion.div>
               )}
-            </button>
-          </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-white/5 rounded-lg">
-            <p className="text-white/60 text-sm text-center mb-2">Demo Credentials:</p>
-            <div className="text-white/80 text-xs space-y-1">
-              <p>
-                <span className="text-yellow-400">Admin:</span> admin@example.com / password
-              </p>
-              <p>
-                <span className="text-blue-400">Customer:</span> customer@example.com / password
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isSignIn && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label className="block text-white/80 mb-2 text-sm">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition-colors"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </motion.div>
+                )}
 
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.1); }
-          50% { transform: translate(-20px, 20px) scale(0.9); }
-          75% { transform: translate(-20px, -20px) scale(1.05); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
+                <div>
+                  <label className="block text-white/80 mb-2 text-sm">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition-colors"
+                    placeholder="admin@example.com or user@example.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white/80 mb-2 text-sm">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition-colors"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <span>{isSignIn ? "Sign In" : "Sign Up"}</span>
+                  )}
+                </button>
+              </form>
+
+              <p className="text-white/60 text-center mt-6 text-sm">
+                Use <strong>admin@example.com</strong> for admin access
+                <br />
+                or any other email for customer access
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Branding */}
+        <motion.div
+          className="text-center mt-6 text-white/60 text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          Inventory Management System
+        </motion.div>
+      </div>
     </div>
   );
 };

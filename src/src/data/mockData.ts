@@ -123,6 +123,33 @@ export const mockProducts: Product[] = [
   },
 ];
 
+export const mockPOItems = [
+  {
+    id: "po-001",
+    supplierName: "Supplier A",
+    productName: "Cement Bag",
+    qty: 100,
+    date: "2025-11-20",
+    time: "10:30",
+    vehicleNumber: "TS07AB1234",
+    transportName: "Speedy Logistics",
+    driverName: "John Doe",
+    mobileNumber: "9876543210",
+  },
+  {
+    id: "po-002",
+    supplierName: "Supplier B",
+    productName: "Steel Rod (TMT)",
+    qty: 50,
+    date: "2025-11-21",
+    time: "14:00",
+    vehicleNumber: "AP09CD5678",
+    transportName: "Reliable Transport",
+    driverName: "Jane Smith",
+    mobileNumber: "8765432109",
+  },
+];
+
 export const mockEmployees: Employee[] = [
   {
     id: "emp-001",

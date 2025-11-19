@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import {
   Package,
   ShoppingCart,
@@ -13,6 +13,7 @@ import {
   X,
   UserCog,
 } from "lucide-react";
+import { MasterMenu } from "./MasterMenu";
 import { useRBAC } from "../hooks/useRBAC";
 
 interface SidebarProps {
@@ -32,18 +33,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const baseNavigation: NavigationItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Products", href: "/products", icon: Box },
-    { name: "Inventory", href: "/inventory", icon: Package },
-    { name: "Sales", href: "/sales", icon: FileText },
-    { name: "Orders", href: "/orders", icon: ShoppingCart },
+    // { name: "Products", href: "/products", icon: Box },
+    // { name: "Inventory", href: "/inventory", icon: Package },
+    // { name: "Sales", href: "/sales", icon: FileText },
+    // { name: "Orders", href: "/orders", icon: ShoppingCart },
   ];
 
   const adminNavigation: NavigationItem[] = [
-    { name: "Purchases", href: "/purchases", icon: ShoppingCart },
-    { name: "Suppliers", href: "/suppliers", icon: Truck },
-    { name: "Employees", href: "/employees", icon: Users },
-    { name: "Users", href: "/users", icon: UserCog },
-    { name: "Stock Movements", href: "/stock-movements", icon: TrendingUp },
+    // { name: "Purchases", href: "/purchases", icon: ShoppingCart },
+    // { name: "Suppliers", href: "/suppliers", icon: Truck },
+    // { name: "Employees", href: "/employees", icon: Users },
+    // { name: "Users", href: "/users", icon: UserCog },
+    // { name: "Stock Movements", href: "/stock-movements", icon: TrendingUp },
   ];
 
   const navigation: NavigationItem[] = isAdmin
@@ -122,6 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 </Link>
               );
             })}
+            {isAdmin && <MasterMenu />}
           </nav>
 
           {/* Footer */}
