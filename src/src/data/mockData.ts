@@ -2,7 +2,11 @@ import { Product } from "../models/product.model";
 import { Employee } from "../models/employee.model";
 import { Order } from "../models/order.model";
 import { Supplier } from "../models/supplier.model";
+import { ScalesItem } from "../models/scales.model";
 import { InventoryItem, Purchase, StockMovement } from "../models/inventory.model";
+import { Item } from "../models/item.model";
+import { Price } from "../models/price.model";
+import { Quantity } from "../models/quantity.model";
 
 export const mockProducts: Product[] = [
   {
@@ -120,6 +124,85 @@ export const mockProducts: Product[] = [
     supplier: "Furniture World",
     createdAt: "2025-11-05T10:15:00Z",
     updatedAt: "2025-11-15T10:15:00Z",
+  },
+];
+
+export const mockItems: Item[] = [
+  { id: 1, productName: 'Cement Bag', qty: 100, price: 350, batchNo: 'B001' },
+  { id: 2, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002' },
+  { id: 3, productName: 'Bricks (Red)', qty: 5000, price: 12, batchNo: 'B003' },
+  { id: 4, productName: 'Sand (River)', qty: 20, price: 1500, batchNo: 'B004' },
+];
+
+export const mockPrices: Price[] = [
+  { id: 1, unit: 'ton', price: 55000 },
+  { id: 2, unit: 'kg', price: 55 },
+  { id: 3, unit: 'bags', price: 350 },
+  // { id: 4, unit: 'piece', price: 12 },
+  // { id: 5, unit: 'cubic meter', price: 1500 },
+];
+
+export const mockQuantities: Quantity[] = [
+  { id: 1, unit: 'Ton', value: 1000 },
+  { id: 2, unit: 'Kg', value: 1 },
+  { id: 3, unit: '25 bag', value: 25 },
+  { id: 4, unit: '50 bag', value: 50 },
+  // { id: 5, unit: 'Piece', value: 1 },
+  // { id: 6, unit: 'Cubic Meter', value: 1 },
+];
+
+export const mockScalesItems: ScalesItem[] = [
+  {
+    id: "scale-1",
+    supplierName: "Supplier A",
+    productName: "Cement",
+    qty: 50,
+    price: 350,
+    date: "2025-10-26",
+    time: "10:30",
+    vehicleNumber: "TN01AB1234",
+    transportName: "Fast Movers",
+    driverName: "John Doe",
+    mobileNumber: "9876543210",
+  },
+  {
+    id: "scale-2",
+    supplierName: "Supplier B",
+    productName: "Steel",
+    qty: 1000,
+    price: 55000,
+    date: "2025-10-27",
+    time: "14:00",
+    vehicleNumber: "KA02CD5678",
+    transportName: "Quick Logistics",
+    driverName: "Jane Smith",
+    mobileNumber: "8765432109",
+  },
+  {
+    id: "scale-3",
+    supplierName: "Supplier C",
+    productName: "Bricks",
+    qty: 5000,
+    price: 12,
+    date: "2025-10-28",
+    time: "09:15",
+    vehicleNumber: "AP03EF9012",
+    transportName: "BuildWell Transports",
+    driverName: "Peter Jones",
+    mobileNumber: "7654321098",
+  },
+  {
+    id: "scale-4",
+    supplierName: "Supplier A",
+    productName: "Sand",
+    qty: 20,
+    price: 1500,
+    date: "2025-10-29",
+    time: "16:45",
+    vehicleNumber: "MH04GH3456",
+    transportName: "Riverbed Supplies",
+    driverName: "Sam Wilson",
+    mobileNumber: "6543210987",
   },
 ];
 
@@ -331,48 +414,13 @@ export const mockOrders: Order[] = [
 ];
 
 export const mockSuppliers: Supplier[] = [
-  {
-    id: "sup-001",
-    name: "Tech Supplies Inc.",
-    email: "contact@techsupplies.com",
-    phone: "+1 555 100 2000",
-    address: "500 Tech Park Drive",
-    city: "San Francisco",
-    country: "USA",
-    productsSupplied: ["Electronics", "Accessories"],
-    rating: 4.5,
-    totalOrders: 45,
-    status: "active",
-    createdAt: "2024-01-15T00:00:00Z",
-  },
-  {
-    id: "sup-002",
-    name: "Furniture World",
-    email: "sales@furnitureworld.com",
-    phone: "+1 555 200 3000",
-    address: "300 Furniture Lane",
-    city: "Chicago",
-    country: "USA",
-    productsSupplied: ["Furniture"],
-    rating: 4.2,
-    totalOrders: 28,
-    status: "active",
-    createdAt: "2024-03-20T00:00:00Z",
-  },
-  {
-    id: "sup-003",
-    name: "Display Tech Ltd.",
-    email: "info@displaytech.com",
-    phone: "+1 555 300 4000",
-    address: "700 Monitor Boulevard",
-    city: "Austin",
-    country: "USA",
-    productsSupplied: ["Electronics", "Displays"],
-    rating: 4.8,
-    totalOrders: 32,
-    status: "active",
-    createdAt: "2024-05-10T00:00:00Z",
-  },
+  { id: "sup-1", supplierCode: "SUP0001", name: "Construction Supplies Co.", email: "contact@constructionsupplies.com", phone: "123-456-7890", address: "123 Industrial Rd", city: "Metropolis", country: "USA", productsSupplied: ["Cement", "Steel"], rating: 4.5, totalOrders: 150, status: "active", createdAt: "2024-01-01T10:00:00Z" },
+  { id: "sup-2", supplierCode: "SUP0002", name: "Global Building Materials", email: "sales@globalbuild.com", phone: "987-654-3210", address: "456 Commerce Blvd", city: "Gotham", country: "USA", productsSupplied: ["Bricks", "Sand"], rating: 4.0, totalOrders: 200, status: "active", createdAt: "2023-11-15T11:30:00Z" },
+  { id: "sup-3", supplierCode: "SUP0003", name: "Eco-Friendly Wood Inc.", email: "info@ecowood.com", phone: "555-111-2222", address: "789 Forest Lane", city: "Star City", country: "USA", productsSupplied: ["Timber", "Plywood"], rating: 4.8, totalOrders: 80, status: "active", createdAt: "2024-03-20T09:00:00Z" },
+  { id: "sup-4", supplierCode: "SUP0004", name: "Metal Fabricators Ltd.", email: "orders@metalfab.com", phone: "222-333-4444", address: "101 Steel Way", city: "Central City", country: "USA", productsSupplied: ["Steel Beams", "Rebar"], rating: 4.2, totalOrders: 120, status: "active", createdAt: "2024-02-10T14:00:00Z" },
+  { id: "sup-5", supplierCode: "SUP0005", name: "Tech Supplies Inc.", email: "contact@techsupplies.com", phone: "+1 555 100 2000", address: "500 Tech Park Drive", city: "San Francisco", country: "USA", productsSupplied: ["Electronics", "Accessories"], rating: 4.5, totalOrders: 45, status: "active", createdAt: "2024-01-15T00:00:00Z" },
+  { id: "sup-6", supplierCode: "SUP0006", name: "Furniture World", email: "sales@furnitureworld.com", phone: "+1 555 200 3000", address: "300 Furniture Lane", city: "Chicago", country: "USA", productsSupplied: ["Furniture"], rating: 4.2, totalOrders: 28, status: "active", createdAt: "2024-03-20T00:00:00Z" },
+  { id: "sup-7", supplierCode: "SUP0007", name: "Display Tech Ltd.", email: "info@displaytech.com", phone: "+1 555 300 4000", address: "700 Monitor Boulevard", city: "Austin", country: "USA", productsSupplied: ["Electronics", "Displays"], rating: 4.8, totalOrders: 32, status: "active", createdAt: "2024-05-10T00:00:00Z" },
 ];
 
 export const mockInventory: InventoryItem[] = [

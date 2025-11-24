@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import { AuthService } from "../services/auth.service";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 export const LoginPage: React.FC = () => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -14,6 +21,7 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [site, setSite] = useState("site-1");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,122 +57,125 @@ export const LoginPage: React.FC = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Night Lamp */}
-        <motion.div
-          className="mb-8 flex flex-col items-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Lamp shade and bulb */}
-          <div className="relative">
-            {/* Hanging cord */}
-            <motion.div
-              className="w-1 bg-gradient-to-b from-gray-400 to-gray-600 mx-auto"
-              style={{ height: "60px" }}
-              animate={{ scaleY: [1, 0.98, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-
-{/* Pull rope with toggle */}
-<motion.div
-  className="absolute cursor-pointer select-none"
-  style={{ top: "20px", left: "calc(50% + 70px)" }}  // SHIFT RIGHT BY 100px
-  whileHover={{ scale: 1.15, rotate: -3 }}
-  whileTap={{ scale: 0.9, y: 10 }} // small pull-down effect
-  animate={{ y: [0, 3, 0] }}
-  transition={{ duration: 1.8, repeat: Infinity }}
-  onClick={toggleMode}  // ← FIX: toggle light
->
-  {/* Rope line */}
-  <div
-    className="w-1.5 mx-auto bg-gradient-to-b from-gray-200 to-gray-500 shadow-md"
-    style={{ height: "40px", borderRadius: "4px" }}
-  />
-
-  {/* Rope handle */}
-  <motion.div
-    className="w-2 h-12 mx-auto rounded-full border-2 bg-gradient-to-b 
-               from-gray-300 to-gray-500 border-gray-700 shadow-xl"
-    animate={{
-      boxShadow: [
-        "0 0 6px rgba(255,255,255,0.2)",
-        "0 0 14px rgba(255,255,255,0.35)",
-        "0 0 6px rgba(255,255,255,0.2)",
-      ],
-    }}
-    transition={{ duration: 2, repeat: Infinity }}
-  />
-</motion.div>
-
-
-            {/* Lamp shade */}
-            <motion.div
-              className="mt-3 w-32 h-20 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-full relative overflow-hidden border-4 border-gray-600"
-              style={{
-                clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
-              }}
-            >
-              {/* Light glow effect */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={isSignIn ? "signin" : "signup"}
-                  className={`absolute inset-0 ${isSignIn ? "bg-yellow-600/20" : "bg-blue-600/20"
-                    } blur-xl`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                />
-              </AnimatePresence>
-
-              {/* Bulb */}
+        {/* 
+          // Night Lamp design commented out as requested
+          <motion.div
+            className="mb-8 flex flex-col items-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            // Lamp shade and bulb
+            <div className="relative">
+              // Hanging cord
               <motion.div
-                className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-10 rounded-full ${isSignIn ? "bg-yellow-300" : "bg-blue-300"
-                  }`}
-                animate={{
-                  boxShadow: isSignIn
-                    ? [
-                      "0 0 20px rgba(253, 224, 71, 0.8)",
-                      "0 0 30px rgba(253, 224, 71, 0.6)",
-                      "0 0 20px rgba(253, 224, 71, 0.8)",
-                    ]
-                    : [
-                      "0 0 20px rgba(147, 197, 253, 0.8)",
-                      "0 0 30px rgba(147, 197, 253, 0.6)",
-                      "0 0 20px rgba(147, 197, 253, 0.8)",
-                    ],
-                }}
+                className="w-1 bg-gradient-to-b from-gray-400 to-gray-600 mx-auto"
+                style={{ height: "60px" }}
+                animate={{ scaleY: [1, 0.98, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-            </motion.div>
 
-            {/* Light beam */}
-            <motion.div
-              className="absolute top-full left-1/2 -translate-x-1/2 w-48 h-96 pointer-events-none"
-              style={{
-                background: isSignIn
-                  ? "linear-gradient(180deg, rgba(253, 224, 71, 0.3) 0%, transparent 70%)"
+              // Pull rope with toggle
+              <motion.div
+                className="absolute cursor-pointer select-none"
+                style={{ top: "20px", left: "calc(50% + 70px)" }} // SHIFT RIGHT BY 100px
+                whileHover={{ scale: 1.15, rotate: -3 }}
+                whileTap={{ scale: 0.9, y: 10 }} // small pull-down effect
+                animate={{ y: [0, 3, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity }}
+                onClick={toggleMode} // ← FIX: toggle light
+              >
+                // Rope line
+                <div
+                  className="w-1.5 mx-auto bg-gradient-to-b from-gray-200 to-gray-500 shadow-md"
+                  style={{ height: "40px", borderRadius: "4px" }}
+                />
+
+                // Rope handle
+                <motion.div
+                  className="w-2 h-12 mx-auto rounded-full border-2 bg-gradient-to-b 
+                 from-gray-300 to-gray-500 border-gray-700 shadow-xl"
+                  animate={{
+                    boxShadow: [
+                      "0 0 6px rgba(255,255,255,0.2)",
+                      "0 0 14px rgba(255,255,255,0.35)",
+                      "0 0 6px rgba(255,255,255,0.2)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.div>
+
+              // Lamp shade
+              <motion.div
+                className="mt-3 w-32 h-20 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-full relative overflow-hidden border-4 border-gray-600"
+                style={{
+                  clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
+                }}
+              >
+                // Light glow effect
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isSignIn ? "signin" : "signup"}
+                    className={`absolute inset-0 ${
+                      isSignIn ? "bg-yellow-600/20" : "bg-blue-600/20"
+                    } blur-xl`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </AnimatePresence>
+
+                // Bulb
+                <motion.div
+                  className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-10 rounded-full ${
+                    isSignIn ? "bg-yellow-300" : "bg-blue-300"
+                  }`}
+                  animate={{
+                    boxShadow: isSignIn
+                      ? [
+                          "0 0 20px rgba(253, 224, 71, 0.8)",
+                          "0 0 30px rgba(253, 224, 71, 0.6)",
+                          "0 0 20px rgba(253, 224, 71, 0.8)",
+                        ]
+                      : [
+                          "0 0 20px rgba(147, 197, 253, 0.8)",
+                          "0 0 30px rgba(147, 197, 253, 0.6)",
+                          "0 0 20px rgba(147, 197, 253, 0.8)",
+                        ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.div>
+
+              // Light beam
+              <motion.div
+                className="absolute top-full left-1/2 -translate-x-1/2 w-48 h-96 pointer-events-none"
+                style={{
+                  background: isSignIn
+                    ? "linear-gradient(180deg, rgba(253, 224, 71, 0.3) 0%, transparent 70%)"
                   : "linear-gradient(180deg, rgba(147, 197, 253, 0.3) 0%, transparent 70%)",
-                clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
-              }}
+                  clipPath: "polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)",
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+
+            // Mode indicator text
+            <motion.p
+              className="mt-24 text-white/80 text-sm"
+              key={isSignIn ? "signin-text" : "signup-text"}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-
-          {/* Mode indicator text */}
-          <motion.p
-            className="mt-24 text-white/80 text-sm"
-            key={isSignIn ? "signin-text" : "signup-text"}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            Pull the rope to switch to {isSignIn ? "Sign Up" : "Sign In"}
-          </motion.p>
-        </motion.div>
+              exit={{ opacity: 0 }}
+            >
+              Pull the rope to switch to {isSignIn ? "Sign Up" : "Sign In"}
+            </motion.p>
+          </motion.div>
+        */}
 
         {/* Form Card */}
         <motion.div
@@ -223,14 +234,14 @@ export const LoginPage: React.FC = () => {
 
                 <div>
                   <label className="block text-white/80 mb-2 text-sm">
-                    Email
+                    Username
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 transition-colors"
-                    placeholder="admin@example.com or user@example.com"
+                    placeholder="Username"
                     required
                   />
                 </div>
@@ -247,6 +258,23 @@ export const LoginPage: React.FC = () => {
                     placeholder="••••••••"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-white/80 mb-2 text-sm">
+                    Site Name
+                  </label>
+                  <Select onValueChange={setSite} defaultValue={site}>
+                    <SelectTrigger className="w-full bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-blue-400">
+                      <SelectValue placeholder="Select a site" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 text-white border-purple-500/50 backdrop-blur-lg">
+                      <SelectItem value="site-1">Site 1</SelectItem>
+                      <SelectItem value="site-2">Site 2</SelectItem>
+                      <SelectItem value="site-3">Site 3</SelectItem>
+                      <SelectItem value="site-4">Site 4</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <button
@@ -267,6 +295,8 @@ export const LoginPage: React.FC = () => {
 
               <p className="text-white/60 text-center mt-6 text-sm">
                 Use <strong>admin@example.com</strong> for admin access
+                <br />
+                Login as admin to manage masters and purchases.
                 <br />
                 or any other email for customer access
               </p>

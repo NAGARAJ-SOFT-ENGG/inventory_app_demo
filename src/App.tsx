@@ -25,6 +25,8 @@ import { ItemMasterPage } from "./src/pages/ItemMasterPage";
 import { SupplierMasterPage } from "./src/pages/SupplierMasterPage";
 import { PriceMasterPage } from "./src/pages/PriceMasterPage";
 import { QtyMasterPage } from "./src/pages/QtyMasterPage";
+import ScalesScreen from "./src/pages/ScalesScreen";
+import { ReportsPage } from "./src/pages/ReportsPage";
 
 const App: React.FC = () => {
   return (
@@ -74,6 +76,8 @@ const AppRoutes: React.FC = () => {
         <Route path="inventory" element={<Inventory />} />
         {/* <Route path="inventory" element={<Inventory />} /> */}
         <Route path="/po-screen" element={<POScreen />} />
+        <Route path="/scales-screen" element={<ScalesScreen />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="sales" element={<Sales />} />
         <Route path="orders" element={<Orders />} />
         <Route

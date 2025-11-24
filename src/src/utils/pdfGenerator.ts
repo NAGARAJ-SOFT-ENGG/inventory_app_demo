@@ -1,15 +1,8 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: {
-      finalY: number;
-    };
-  }
-}
-
+// Extend jsPDF with the autoTable plugin
+(jsPDF.prototype as any).autoTable = autoTable;
 export const generatePDF = (
   title: string,
   headers: string[],
@@ -27,7 +20,7 @@ export const generatePDF = (
   doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
 
   // Add table
-  doc.autoTable({
+  (doc as any).autoTable({
     head: [headers],
     body: data,
     startY: 35,

@@ -1,237 +1,509 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../../components/ui/dialog";
-import { mockPOItems, mockProducts } from "../data/mockData";
-import { Label } from "../../components/ui/label";
-import { Input } from "../../components/ui/input";
+import React, { useState, useEffect } from "react";
+import { 
+  X, 
+  Plus, 
+  ScanBarcode, 
+  ChevronDown, 
+  Trash2
+} from "lucide-react"; 
+import { mockItems, mockQuantities, mockSuppliers } from "../data/mockData";
 import { Button } from "../../components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 
-// Define the type for a POItem record
-interface POItem {
-  id: string;
-  supplierName: string;
-  productName: string;
-  qty: number;
-  date: string;
-  time: string;
-  vehicleNumber: string;
-  transportName: string;
-  driverName: string;
-  mobileNumber: string;
-}
 
-// Mock data for dropdowns, assuming these are from your master files
-const mockSuppliers = [
-  { id: 1, name: 'Supplier A', address: '123 Main St, Anytown', paymode: 'Credit Card' },
-  { id: 2, name: 'Supplier B', address: '456 Oak Ave, Othertown', paymode: 'Bank Transfer' },
-];
-
-const mockQuantities = [
-  { id: 1, unit: 'Ton', value: 1000 },
-  { id: 2, unit: 'Kg', value: 1 },
-  { id: 3, unit: '25 bag', value: 25 },
-  { id: 4, unit: '50 bag', value: 50 },
-];
-
-// We will use mockProducts from mockData.ts for products
-
+// --- MAIN COMPONENT ---
 
 const POScreen = () => {
-  const [poItems, setPoItems] = useState<POItem[]>(mockPOItems);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedPOItem, setSelectedPOItem] = useState<POItem | null>(null);
-  const [formData, setFormData] = useState<Partial<POItem>>({});
+  // --- STATE ---
+  const [items, setItems] = useState([
+    // { id: 1, name: "POPCORN T-SHIRT", description: "", hsn: "", qty: 1, unit: "PCS", price: 350, discount: 0, tax: 0, amount: 350 }
+  ]);
 
-  const filteredPOItems = poItems.filter(
-    (item) =>
-      item.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [globalState, setGlobalState] = useState({
+    invoiceNo: "1",
+    date: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    paymentTerms: "30",
+    roundOff: 0,
+    isAutoRoundOff: true,
+    amountPaid: 0,
+    paymentMode: "Cash",
+    termsVisible: true,
+  });
 
-  const handleAdd = () => {
-    const newItem: POItem = {
-      id: `po-${Date.now()}`,
-      supplierName: formData.supplierName || "",
-      productName: formData.productName || "",
-      qty: formData.qty || 0,
-      date: formData.date || "",
-      time: formData.time || "",
-      vehicleNumber: formData.vehicleNumber || "",
-      transportName: formData.transportName || "",
-      driverName: formData.driverName || "",
-      mobileNumber: formData.mobileNumber || "",
+  // --- CALCULATIONS ---
+
+  const calculateRow = (item) => {
+    // 1. Base Amount
+    const baseAmount = (parseFloat(String(item.qty)) || 0) * (parseFloat(String(item.price)) || 0);
+    const taxableValue = baseAmount - (parseFloat(String(item.discount)) || 0);
+    const taxVal = taxableValue * ((item.tax || 0) / 100);
+    const finalAmount = taxableValue + taxVal;
+
+    return { 
+      ...item, 
+      amount: finalAmount 
     };
-    setPoItems([newItem, ...poItems]);
-    setIsAddDialogOpen(false);
-    setFormData({});
   };
 
-  const handleEdit = () => {
-    if (selectedPOItem) {
-      setPoItems(
-        poItems.map((item) =>
-          item.id === selectedPOItem.id ? { ...item, ...formData } : item
-        )
-      );
-      setIsEditDialogOpen(false);
-      setSelectedPOItem(null);
-      setFormData({});
+  // Recalculate totals whenever items or global state changes
+  const totals = React.useMemo(() => {
+    const subtotal = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+    const totalDiscount = items.reduce((sum, item) => sum + (parseFloat(String(item.discount)) || 0), 0);
+    const taxableAmount = subtotal - totalDiscount;
+    const totalTax = items.reduce((sum, item) => sum + ((item.qty * item.price) - (parseFloat(String(item.discount)) || 0)) * ((parseFloat(String(item.tax)) || 0) / 100), 0);
+    
+    let total = subtotal - totalDiscount + totalTax;
+    
+    // Round Off Logic
+    let roundOffValue = 0;
+    if (globalState.isAutoRoundOff) {
+      const rounded = Math.round(total);
+      roundOffValue = rounded - total;
+      total = rounded;
+    } else {
+      total += parseFloat(String(globalState.roundOff)) || 0;
+      roundOffValue = parseFloat(String(globalState.roundOff)) || 0;
     }
+
+    const balanceDue = total - (parseFloat(String(globalState.amountPaid)) || 0);
+
+    return { subtotal, totalDiscount, taxableAmount, totalTax, total, roundOffValue, balanceDue };
+  }, [items, globalState]);
+
+  // --- HANDLERS ---
+
+  const handleAddItem = () => {
+    const newItem = {
+      id: Date.now(),
+      name: "",
+      description: "",
+      hsn: "",
+      qty: 1,
+      unit: "PCS",
+      price: 0,
+      discount: 0,
+      tax: 0,
+      amount: 0
+    };
+    setItems([...items, newItem]);
   };
 
-  const handleDelete = () => {
-    if (selectedPOItem) {
-      setPoItems(poItems.filter((item) => item.id !== selectedPOItem.id));
-      setIsDeleteDialogOpen(false);
-      setSelectedPOItem(null);
-    }
+  const handleDeleteItem = (id) => {
+    setItems(items.filter(i => i.id !== id));
   };
 
-  const openEditDialog = (item: POItem) => {
-    setSelectedPOItem(item);
-    setFormData(item);
-    setIsEditDialogOpen(true);
+  const updateItem = (id, field, value) => {
+    setItems(items.map(item => {
+      if (item.id === id && field === 'name') {
+        const selectedMockItem = mockItems.find(mi => mi.productName === value);
+        if (selectedMockItem) {
+          // When item name changes, update the price from mock data
+          item.price = selectedMockItem.price;
+        }
+      }
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        return calculateRow(updatedItem);
+      }
+      return item;
+    }));
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-gray-900 mb-2">Purchase Order Screen</h2>
-          <p className="text-gray-600">Manage your purchase orders</p>
-        </div>
-        <Button onClick={() => setIsAddDialogOpen(true)} variant="gradient" size="lg">
-          <Plus className="w-5 h-5 mr-2" />
-          <span>Add PO</span>
-        </Button>
-      </div>
-
-      {/* Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search by supplier, product, driver..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10"
-          />
+    <div className="min-h-screen  font-sans text-gray-800 pb-6">
+      
+      {/* --- HEADER --- */}
+      <div className="flex items-center justify-between text-gray-900 mb-2 sticky top-0 z-20">       
+         <h1 className="text-xl font-semibold text-gray-800">Create Purchase Invoice</h1>
+        
+        <div className="flex items-center gap-3">          
+          <Button variant="gradient" className="py-2" >Save Purchase</Button>
         </div>
       </div>
 
-      {/* PO Table */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Supplier</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Product</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Qty</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Date & Time</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Vehicle No.</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Driver</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Transport Name</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Mobile Number</th>
-                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredPOItems.map((item, index) => (
-                <motion.tr key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} className="hover:bg-blue-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900">{item.supplierName}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.productName}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.qty}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.date} @ {item.time}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.vehicleNumber}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.driverName} ({item.mobileNumber})</td>
-                  <td className="px-6 py-4 text-gray-600">{item.transportName}</td>
-                  <td className="px-6 py-4 text-gray-600">{item.mobileNumber}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedPOItem(item); setIsDeleteDialogOpen(true); }} className="text-red-600 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div className="max-w-[1600px] mx-auto p-0 space-y-4">
+        
+        {/* --- MAIN FORM CARD --- */}
+        <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+          
+          {/* Top Section: Party & Details */}
+          <div className="p-4 border-b border-gray-200 space-y-4">
+            
+            {/* First Row: Party and Invoice No */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              <div className="space-y-2">
+                <Label>Bill From</Label>
+                <Select>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Select a supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockSuppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.name}>{supplier.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={(open) => { if (!open) { setIsAddDialogOpen(false); setIsEditDialogOpen(false); } }}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{isAddDialogOpen ? 'Add Purchase Order' : 'Edit Purchase Order'}</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-              <Label>Supplier Name</Label>
-              <Select value={formData.supplierName} onValueChange={(value) => setFormData({ ...formData, supplierName: value })}>
-                <SelectTrigger><SelectValue placeholder="Select a supplier" /></SelectTrigger>
-                <SelectContent>
-                  {mockSuppliers.map(supplier => <SelectItem key={supplier.id} value={supplier.name}>{supplier.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                  <Label>Purchase Inv No</Label>
+                  <Input value={globalState.invoiceNo} onChange={(e) => setGlobalState({...globalState, invoiceNo: e.target.value})} className="bg-gray-50" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Product Name</Label>
-              <Select value={formData.productName} onValueChange={(value) => setFormData({ ...formData, productName: value })}>
-                <SelectTrigger><SelectValue placeholder="Select a product" /></SelectTrigger>
-                <SelectContent>
-                  {mockProducts.map(product => <SelectItem key={product.id} value={product.name}>{product.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+
+            {/* Second Row: Dates and Terms */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Purchase Inv Date</Label>
+                  <Input 
+                    type="date" 
+                    value={globalState.date} 
+                    onChange={(e) => setGlobalState({...globalState, date: e.target.value})}
+                    className="bg-gray-50" 
+                  /> 
+                </div>
+                <div className="space-y-2">
+                   <Label>Payment Terms</Label>
+                    <Input placeholder="e.g., 30 days" />
+                </div>
+                <div className="space-y-2">
+                   <Label>Due Date</Label>
+                   <Input 
+                      type="date" 
+                      value={globalState.dueDate} 
+                      onChange={(e) => setGlobalState({...globalState, dueDate: e.target.value})}
+                      className="bg-gray-50" 
+                    />
+                </div>
             </div>
-            <div className="space-y-2">
-              <Label>Quantity</Label>
-              <Select value={formData.qty?.toString()} onValueChange={(value) => setFormData({ ...formData, qty: parseInt(value) })}>
-                <SelectTrigger><SelectValue placeholder="Select a quantity" /></SelectTrigger>
-                <SelectContent>
-                  {mockQuantities.map(qty => <SelectItem key={qty.id} value={qty.value.toString()}>{qty.unit} ({qty.value})</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Date</Label><Input type="date" value={formData.date || ''} onChange={(e) => setFormData({ ...formData, date: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Time</Label><Input type="time" value={formData.time || ''} onChange={(e) => setFormData({ ...formData, time: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Vehicle Number</Label><Input value={formData.vehicleNumber || ''} onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Transport Name</Label><Input value={formData.transportName || ''} onChange={(e) => setFormData({ ...formData, transportName: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Driver Name</Label><Input value={formData.driverName || ''} onChange={(e) => setFormData({ ...formData, driverName: e.target.value })} /></div>
-            <div className="space-y-2 md:col-span-2"><Label>Mobile Number</Label><Input value={formData.mobileNumber || ''} onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })} /></div>
           </div>
-          <DialogFooter><Button variant="gradient" size="lg" onClick={isAddDialogOpen ? handleAdd : handleEdit}>{isAddDialogOpen ? 'Add PO' : 'Save Changes'}</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Delete Purchase Order</DialogTitle></DialogHeader>
-          <p>Are you sure you want to delete the PO for "{selectedPOItem?.productName}" from "{selectedPOItem?.supplierName}"?</p>
-          <DialogFooter><Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button><Button variant="destructive" onClick={handleDelete}>Delete</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {/* --- ITEMS TABLE (FIXED UI) --- */}
+          <div className="overflow-x-auto w-full border-t border-b border-gray-200">
+            <table className="w-full min-w-[1000px] border-collapse">
+              <thead className="bg-gray-50 border-y border-gray-200 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                <tr>
+                  <th className="py-2 px-3 text-center w-12">NO</th>
+                  <th className="py-2 px-3 text-center w-auto">ITEMS/SERVICES</th>
+                  <th className="py-2 px-3 text-center w-32">UNIT</th>
+                  <th className="py-2 px-3 text-center w-32">QTY</th>
+                  <th className="py-2 px-3 text-center w-32">PRICE (₹)</th>
+                  <th className="py-2 px-3 text-center w-32">DISCOUNT</th>
+                  <th className="py-2 px-3 text-center w-32">TAX</th>
+                  <th className="py-2 px-3 text-center w-32">AMOUNT (₹)</th>
+                  <th className="py-2 px-3 w-10"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((item, index) => (
+                  <tr key={item.id} className="group hover:bg-gray-50 transition-colors align-top">
+                    {/* NO */}
+                    <td className="py-3 px-3 text-center text-gray-500 text-sm align-top pt-4">
+                      {index + 1}
+                    </td>
+
+                    {/* ITEMS/SERVICES */}
+                    <td className="py-3 px-3">
+                      <Select value={item.name} onValueChange={(value) => updateItem(item.id, 'name', value)}>
+                        <SelectTrigger><SelectValue placeholder="Select Item" /></SelectTrigger>
+                        <SelectContent>
+                          {mockItems.map(mockItem => (
+                            <SelectItem key={mockItem.id} value={mockItem.productName}>{mockItem.productName}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+
+                    {/* UNIT */}
+                    <td className="py-3 px-3">
+                      <Select value={item.unit} onValueChange={(value) => updateItem(item.id, 'unit', value)}>
+                        <SelectTrigger><SelectValue placeholder="Unit" /></SelectTrigger>
+                        <SelectContent>
+                          {mockQuantities.map(q => (
+                            <SelectItem key={q.id} value={q.unit}>{q.unit}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+
+                    {/* QTY */}
+                    <td className="py-3 px-3">
+                      <Select 
+                        value={String(item.qty)} 
+                        onValueChange={(value) => updateItem(item.id, 'qty', parseFloat(value) || 0)}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Qty" /></SelectTrigger>
+                        <SelectContent>
+                          {mockQuantities.map(q => (
+                            <SelectItem key={q.id} value={String(q.value)}>{q.value}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+
+                    {/* PRICE */}
+                    <td className="py-3 px-3">
+                      <Input 
+                        type="number" 
+                        value={item.price} 
+                        onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                        className="text-right"
+                      />
+                    </td>
+
+                    {/* DISCOUNT */}
+                    <td className="py-3 px-3">
+                      <Input 
+                        type="number" 
+                        placeholder="0.00"
+                        value={item.discount} 
+                        onChange={(e) => updateItem(item.id, 'discount', parseFloat(e.target.value) || 0)}
+                        className="text-right"
+                      />
+                    </td>
+
+                    {/* TAX */}
+                    <td className="py-3 px-3">
+                      <Input 
+                        type="number" 
+                        placeholder="%"
+                        value={item.tax} 
+                        onChange={(e) => updateItem(item.id, 'tax', parseFloat(e.target.value) || 0)}
+                        className="text-right"
+                      />
+                    </td>
+
+                    {/* AMOUNT */}
+                    <td className="py-3 px-3 text-right font-medium text-gray-800 pt-4">
+                      ₹ {item.amount.toFixed(2)}
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td className="py-3 px-3 text-center pt-3">
+                       <button 
+                         onClick={() => handleDeleteItem(item.id)} 
+                         className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Add Item Bar */}
+            <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleAddItem}
+                  className="flex-1 border-2 border-dashed border-blue-300 rounded-md p-3 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors text-blue-500 font-medium text-sm gap-2"
+                >
+                  <Plus className="h-4 w-4" /> Add Item
+                </button>
+                <div className="w-48">
+                  <Button variant="outline" className="w-full h-full border-gray-300 text-gray-700 gap-2 font-normal">
+                    <ScanBarcode className="h-5 w-5" />
+                    Scan Barcode
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+             {/* Subtotal Row */}
+             {/* <div className="flex justify-end pt-4 pr-12 pb-4 gap-12 text-sm border-t border-gray-100 bg-white">
+                 <div className="flex items-center gap-8">
+                    <span className="text-xs font-bold text-gray-400 tracking-wider">SUBTOTAL</span>
+                    <div className="flex gap-12"> 
+                       <span className="w-24 text-right text-gray-400">₹ {(totals.taxableAmount || 0).toFixed(2)}</span>
+                       <span className="w-24 text-right font-bold text-gray-800">₹ {(totals.subtotal || 0).toFixed(2)}</span>
+                    </div>
+                 </div>
+             </div> */}
+          </div>
+
+          {/* --- BOTTOM SECTION --- */}
+          <div className="flex flex-col lg:flex-row border-t border-gray-200">
+            
+            {/* Left: Notes & Terms */}
+            <div className="w-full lg:w-1/2 p-0 space-y-6 border-r border-gray-200">
+               {/* <button className="text-blue-500 text-sm font-medium hover:underline flex items-center gap-1">
+                 <Plus className="h-3 w-3" /> Add Notes
+               </button> */}
+               
+               {/* {globalState.termsVisible && (
+                 <div className="space-y-2 relative group">
+                   <div className="flex justify-between items-center">
+                      <Label className="text-gray-700 font-semibold mb-0">Terms and Conditions</Label>
+                      <button 
+                        onClick={() => setGlobalState({...globalState, termsVisible: false})}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                   </div>
+                   <div className="bg-gray-100 rounded-md p-4 text-xs text-gray-600 space-y-1 border border-gray-200">
+                     <p>1. Goods once sold will not be taken back or exchanged</p>
+                     <p>2. All disputes are subject to [ENTER_YOUR_CITY_NAME] jurisdiction only</p>
+                   </div>
+                 </div>
+               )} */}
+            </div>
+
+            {/* Right: Calculations */}
+            <div className="w-full lg:w-1/2 p-2 space-y-3 bg-white">
+               
+               {/* Additional Charges */}
+               {/* <div className="flex justify-between items-center text-sm">
+                 <div className="flex items-center gap-2">
+                    <button className="text-blue-500 hover:underline flex items-center gap-1">
+                        <Plus className="h-3 w-3" /> Add Additional Charges
+                    </button>
+                 </div>
+                 <div className="w-32">
+                    <Input 
+                      type="number" 
+                      className="text-right h-7"  
+                      value={globalState.additionalCharges || ''}
+                      onChange={(e) => setGlobalState({...globalState, additionalCharges: parseFloat(e.target.value) || 0})}
+                    />
+                 </div>
+               </div> */}
+
+               {/* Taxable Amount Display */}
+               {/* <div className="flex justify-between items-center text-sm">
+                 <span className="text-gray-600">Taxable Amount</span>
+                 <span className="font-medium text-gray-800">₹ {(totals.taxableAmount || 0).toFixed(2)}</span>
+               </div> */}
+
+               {/* Global Discount */}
+               {/* <div className="flex justify-between items-center text-sm">
+                 <button className="text-blue-500 hover:underline flex items-center gap-1">
+                    <Plus className="h-3 w-3" /> Add Discount
+                 </button>
+                 <div className="w-32 flex items-center gap-2 text-gray-600">
+                    <span>-</span>
+                    <Input 
+                      type="number" 
+                      className="text-right h-7"
+                      value={globalState.globalDiscount || ''}
+                      onChange={(e) => setGlobalState({...globalState, globalDiscount: parseFloat(e.target.value) || 0})}
+                    />
+                 </div>
+               </div> */}
+               
+               {/* Round Off */}
+               {/* <div className="flex justify-between items-center py-2">
+                  <div className="flex items-center gap-2">
+                     <input 
+                        type="checkbox" 
+                        id="autoRoundOff"
+                        checked={globalState.isAutoRoundOff}
+                        onChange={(e) => setGlobalState({...globalState, isAutoRoundOff: e.target.checked})}
+                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-4 w-4" 
+                     />
+                     <label htmlFor="autoRoundOff" className="text-sm text-gray-700 cursor-pointer">Auto Round Off</label>
+                  </div>
+                  
+                  {globalState.isAutoRoundOff ? (
+                     <span className="text-sm text-gray-600">{totals.roundOffValue > 0 ? '+' : ''}{(totals.roundOffValue || 0).toFixed(2)}</span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                       <Select className="w-20 h-8 text-xs p-1">
+                         <option>+ Add</option>
+                         <option>- Reduce</option>
+                       </Select>
+                       <div className="relative">
+                         <span className="absolute left-2 top-1.5 text-gray-500 text-xs">₹</span>
+                         <Input 
+                            className="w-20 h-8 pl-5 text-right" 
+                            value={globalState.roundOff || ''}
+                            onChange={(e) => setGlobalState({...globalState, roundOff: parseFloat(e.target.value)})}
+                         />
+                       </div>
+                    </div>
+                  )}
+               </div> */}
+               
+               {/* <div className="border-t border-gray-100 my-2"></div> */}
+
+               {/* Total Amount */}
+               <div className="flex justify-between items-center mb-4">
+                  <span className="text-lg font-bold text-gray-800">Total Amount</span>
+                  <div className="bg-gray-100 text-gray-400 px-4 py-1 rounded-md text-sm font-medium min-w-[140px] text-right border border-gray-200">
+                    ₹ {(totals.total || 0).toFixed(2)} 
+                  </div>
+               </div>
+
+               {/* <div className="border-t border-gray-100 my-4"></div> */}
+               
+               {/* Payment Section */}
+               <div className="space-y-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+                  <div className="flex justify-end">
+                     <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600 cursor-pointer select-none" htmlFor="full-paid">Mark as fully paid</label>
+                        <input 
+                           id="full-paid" 
+                           type="checkbox" 
+                           onChange={(e) => {
+                             if(e.target.checked) setGlobalState({...globalState, amountPaid: totals.total});
+                             else setGlobalState({...globalState, amountPaid: 0});
+                           }}
+                           className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-4 w-4" 
+                        />
+                     </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between gap-4">
+                     <span className="text-sm font-medium text-gray-600">Amount Paid ₹</span>
+                     <div className="flex-1 flex gap-2">
+                        <div className="relative flex-1">
+                           <span className="absolute left-3 top-4 text-gray-500 font-medium"></span>
+                           <Input 
+                              className="pl-6 bg-white font-medium text-gray-800" 
+                              value={globalState.amountPaid || ''}
+                              onChange={(e) => setGlobalState({...globalState, amountPaid: parseFloat(e.target.value) || 0})}
+                           />
+                        </div>
+                        <Select 
+                           value={globalState.paymentMode}
+                           onValueChange={(value) => setGlobalState({...globalState, paymentMode: value})}
+                        >
+                          <SelectTrigger className="w-32 bg-white"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash">Cash</SelectItem>
+                            <SelectItem value="Bank">Bank</SelectItem>
+                            <SelectItem value="Cheque">Cheque</SelectItem>
+                          </SelectContent>
+                        </Select>
+                     </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                     <span className="text-green-600 font-medium text-sm">Balance Amount</span>
+                     <span className="text-green-600 font-bold text-lg">₹ {totals.balanceDue > 0 ? (totals.balanceDue || 0).toFixed(2) : '0.00'}</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Right: Signature */}
+            {/* <div className="w-full lg:w-1/2 p-6 flex flex-col justify-end items-end">
+               <div className="w-full max-w-xs text-center">
+                 <div className="h-16 border-2 border-dashed border-blue-200 rounded-lg flex items-center justify-center bg-blue-50/10 cursor-pointer hover:bg-blue-50 transition-colors">
+                    <span className="text-blue-400 text-sm flex items-center gap-1"><Plus className="h-3 w-3" /> Add Signature</span>
+                 </div>
+                 <div className="border-t-2 border-gray-300 mt-2"></div>
+                 <p className="text-xs text-gray-500 mt-1">Authorized Signatory</p>
+               </div>
+
+            </div> */}
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 };

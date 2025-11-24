@@ -35,12 +35,14 @@ export const Suppliers: React.FC = () => {
     (supplier) =>
       supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.city.toLowerCase().includes(searchTerm.toLowerCase())
+      supplier.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (supplier.supplierCode && supplier.supplierCode.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleGeneratePDF = () => {
-    const headers = ["Name", "Email", "Phone", "City", "Country", "Rating", "Total Orders"];
+    const headers = ["Code", "Name", "Email", "Phone", "City", "Country", "Rating", "Total Orders"];
     const data = suppliers.map((s) => [
+      s.supplierCode || '',
       s.name,
       s.email,
       s.phone,
@@ -55,6 +57,7 @@ export const Suppliers: React.FC = () => {
   const handleAdd = () => {
     const newSupplier: Supplier = {
       id: `sup-${Date.now()}`,
+      supplierCode: `SUP${String(suppliers.length + 1).padStart(4, "0")}`,
       name: formData.name || "",
       email: formData.email || "",
       phone: formData.phone || "",
@@ -141,6 +144,9 @@ export const Suppliers: React.FC = () => {
                   Supplier
                 </th>
                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">
+                  Code
+                </th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">
                   Contact
                 </th>
                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">
@@ -183,6 +189,7 @@ export const Suppliers: React.FC = () => {
                       </div>
                     </div>
                   </td>
+                  <td className="px-6 py-4 text-gray-600">{supplier.supplierCode}</td>
                   <td className="px-6 py-4 text-gray-600">{supplier.phone}</td>
                   <td className="px-6 py-4">
                     <p className="text-gray-900">{supplier.city}</p>
@@ -272,6 +279,15 @@ export const Suppliers: React.FC = () => {
                 value={formData.name || ""}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="ABC Suppliers Inc."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="supplierCode">Supplier Code</Label>
+              <Input
+                id="supplierCode"
+                value={formData.supplierCode || ""}
+                onChange={(e) => setFormData({ ...formData, supplierCode: e.target.value })}
+                placeholder="e.g., SUP0001"
               />
             </div>
             <div className="space-y-2">

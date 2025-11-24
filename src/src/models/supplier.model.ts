@@ -1,5 +1,6 @@
 export interface Supplier {
   id: string;
+  supplierCode?: string;
   name: string;
   email: string;
   phone: string;

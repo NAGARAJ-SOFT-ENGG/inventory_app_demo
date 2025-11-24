@@ -16,38 +16,19 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
-
-// Define the type for a Price record.
-interface Price {
-  id: string | number;
-  unit: 'ton' | 'kg' | 'bags';
-  price: number;
-}
-
-// Dummy API function - replace with your actual data fetching logic.
-const fetchPrices = async (): Promise<Price[]> => {
-  // In a real app, you would make an API call here.
-  return Promise.resolve([
-    { id: 1, unit: 'ton', price: 55000 },
-    { id: 2, unit: 'kg', price: 55 },
-    { id: 3, unit: 'bags', price: 350 },
-  ]);
-};
+  SelectValue, 
+} from '../../components/ui/select'; 
+import { mockPrices } from '../data/mockData';
+import { Price } from '../models/price.model';
 
 export const PriceMasterPage: React.FC = () => {
-  const [prices, setPrices] = useState<Price[]>([]);
+  const [prices, setPrices] = useState<Price[]>(mockPrices);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState<Price | null>(null);
   const [formData, setFormData] = useState<Partial<Price>>({});
-
-  useEffect(() => {
-    fetchPrices().then(setPrices);
-  }, []);
 
   const filteredPrices = prices.filter((price) =>
     price.unit.toLowerCase().includes(searchTerm.toLowerCase())

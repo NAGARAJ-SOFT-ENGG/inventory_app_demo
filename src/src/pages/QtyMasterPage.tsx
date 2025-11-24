@@ -16,39 +16,19 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
-
-// Define the type for a Quantity record.
-interface Quantity {
-  id: string | number;
-  unit: 'Ton' | 'Kg' | '25 bag' | '50 bag';
-  value: number; // e.g., for 'Ton', value might be 1000 (if base is Kg)
-}
-
-// Dummy API function - replace with your actual data fetching logic.
-const fetchQuantities = async (): Promise<Quantity[]> => {
-  // In a real app, you would make an API call here.
-  return Promise.resolve([
-    { id: 1, unit: 'Ton', value: 1000 },
-    { id: 2, unit: 'Kg', value: 1 },
-    { id: 3, unit: '25 bag', value: 25 },
-    { id: 4, unit: '50 bag', value: 50 },
-  ]);
-};
+  SelectValue, 
+} from '../../components/ui/select'; 
+import { mockQuantities } from '../data/mockData';
+import { Quantity } from '../models/quantity.model';
 
 export const QtyMasterPage: React.FC = () => {
-  const [quantities, setQuantities] = useState<Quantity[]>([]);
+  const [quantities, setQuantities] = useState<Quantity[]>(mockQuantities);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedQuantity, setSelectedQuantity] = useState<Quantity | null>(null);
   const [formData, setFormData] = useState<Partial<Quantity>>({});
-
-  useEffect(() => {
-    fetchQuantities().then(setQuantities);
-  }, []);
 
   const filteredQuantities = quantities.filter((qty) =>
     qty.unit.toLowerCase().includes(searchTerm.toLowerCase())

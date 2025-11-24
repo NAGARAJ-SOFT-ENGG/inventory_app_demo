@@ -10,38 +10,18 @@ import {
 } from '../../components/ui/dialog';
 import { Label } from '../../components/ui/label';
 import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-
-// Define the type for an Item record, which will ensure type safety.
-interface Item {
-  id: string | number;
-  productName: string;
-  qty: number;
-  price: number;
-  batchNo: string;
-}
-
-// Dummy API function - replace with your actual data fetching logic.
-const fetchItems = async (): Promise<Item[]> => {
-  // In a real app, you would make an API call here.
-  return Promise.resolve([
-    { id: 1, productName: 'Cement Bag', qty: 100, price: 350, batchNo: 'B001' },
-    { id: 2, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002' },
-  ]);
-};
+import { Button } from '../../components/ui/button'; 
+import { mockItems } from '../data/mockData';
+import { Item } from '../models/item.model';
 
 export const ItemMasterPage: React.FC = () => {
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Item[]>(mockItems);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [formData, setFormData] = useState<Partial<Item>>({});
-
-  useEffect(() => {
-    fetchItems().then(setItems);
-  }, []);
 
   const filteredItems = items.filter(
     (item) =>

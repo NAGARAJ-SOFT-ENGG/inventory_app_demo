@@ -260,7 +260,7 @@ export const Orders: React.FC = () => {
       {/* Add/Edit Dialog */}
       <Dialog
         open={isAddDialogOpen || isEditDialogOpen}
-        onOpenChange={(open) => {
+        onOpenChange={(open:any) => {
           if (!open) {
             setIsAddDialogOpen(false);
             setIsEditDialogOpen(false);
