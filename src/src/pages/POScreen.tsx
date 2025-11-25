@@ -4,13 +4,16 @@ import {
   Plus, 
   ScanBarcode, 
   ChevronDown, 
-  Trash2
+  Trash2,
+  Printer
 } from "lucide-react"; 
 import { mockItems, mockQuantities, mockSuppliers } from "../data/mockData";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import ItemsTable from "../../components/ui/ItemsTable";
+import { generatePurchaseInvoicePDF } from "../utils/purchaseInvoiceGenerator";
 
 
 // --- MAIN COMPONENT ---
@@ -21,10 +24,22 @@ const POScreen = () => {
     // { id: 1, name: "POPCORN T-SHIRT", description: "", hsn: "", qty: 1, unit: "PCS", price: 350, discount: 0, tax: 0, amount: 350 }
   ]);
 
+  const [view, setView] = useState<'desktop' | 'mobile'>('desktop');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setView(window.innerWidth < 768 ? 'mobile' : 'desktop');
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Set initial view
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [globalState, setGlobalState] = useState({
     invoiceNo: "1",
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    supplierName: "", // Add supplier name to global state
     paymentTerms: "30",
     roundOff: 0,
     isAutoRoundOff: true,
@@ -32,6 +47,10 @@ const POScreen = () => {
     paymentMode: "Cash",
     termsVisible: true,
   });
+
+  const selectedSupplier = React.useMemo(() => {
+    return mockSuppliers.find(s => s.name === globalState.supplierName) || null;
+  }, [globalState.supplierName]);
 
   // --- CALCULATIONS ---
 
@@ -83,10 +102,10 @@ const POScreen = () => {
       hsn: "",
       qty: 1,
       unit: "PCS",
-      price: 0,
-      discount: 0,
-      tax: 0,
-      amount: 0
+      price: '',
+      discount: '',
+      tax: '',
+      amount: 0,
     };
     setItems([...items, newItem]);
   };
@@ -96,7 +115,7 @@ const POScreen = () => {
   };
 
   const updateItem = (id, field, value) => {
-    setItems(items.map(item => {
+    setItems(items.map((item) => {
       if (item.id === id && field === 'name') {
         const selectedMockItem = mockItems.find(mi => mi.productName === value);
         if (selectedMockItem) {
@@ -105,26 +124,38 @@ const POScreen = () => {
         }
       }
       if (item.id === id) {
-        const updatedItem = { ...item, [field]: value };
+        let updatedValue = value;
+        if (['price', 'discount', 'tax', 'qty'].includes(field)) {
+          // Allow empty string, otherwise parse to float
+          updatedValue = value === '' ? '' : parseFloat(value) || 0;
+        }
+        const updatedItem = { ...item, [field]: updatedValue };
         return calculateRow(updatedItem);
       }
       return item;
     }));
   };
 
+  const handlePrint = () => {
+    generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier);
+  };
+
   return (
     <div className="min-h-screen  font-sans text-gray-800 pb-6">
       
       {/* --- HEADER --- */}
-      <div className="flex items-center justify-between text-gray-900 mb-2 sticky top-0 z-20">       
+      <div className="flex items-center justify-between text-gray-900 mb-2 sticky top-0 z-20 print-hide">       
          <h1 className="text-xl font-semibold text-gray-800">Create Purchase Invoice</h1>
         
-        <div className="flex items-center gap-3">          
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={handlePrint}>
+            <Printer className="h-5 w-5" />
+          </Button>
           <Button variant="gradient" className="py-2" >Save Purchase</Button>
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto p-0 space-y-4">
+      <div id="printable-invoice" className="max-w-[1600px] mx-auto p-0 space-y-4">
         
         {/* --- MAIN FORM CARD --- */}
         <div className="bg-white shadow-sm rounded-lg border border-gray-200">
@@ -136,7 +167,10 @@ const POScreen = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
               <div className="space-y-2">
                 <Label>Bill From</Label>
-                <Select>
+                <Select 
+                  value={globalState.supplierName} 
+                  onValueChange={(value) => setGlobalState({...globalState, supplierName: value})}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select a supplier" />
                   </SelectTrigger>
@@ -181,137 +215,15 @@ const POScreen = () => {
             </div>
           </div>
 
-          {/* --- ITEMS TABLE (FIXED UI) --- */}
-          <div className="overflow-x-auto w-full border-t border-b border-gray-200">
-            <table className="w-full min-w-[1000px] border-collapse">
-              <thead className="bg-gray-50 border-y border-gray-200 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                <tr>
-                  <th className="py-2 px-3 text-center w-12">NO</th>
-                  <th className="py-2 px-3 text-center w-auto">ITEMS/SERVICES</th>
-                  <th className="py-2 px-3 text-center w-32">UNIT</th>
-                  <th className="py-2 px-3 text-center w-32">QTY</th>
-                  <th className="py-2 px-3 text-center w-32">PRICE (₹)</th>
-                  <th className="py-2 px-3 text-center w-32">DISCOUNT</th>
-                  <th className="py-2 px-3 text-center w-32">TAX</th>
-                  <th className="py-2 px-3 text-center w-32">AMOUNT (₹)</th>
-                  <th className="py-2 px-3 w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {items.map((item, index) => (
-                  <tr key={item.id} className="group hover:bg-gray-50 transition-colors align-top">
-                    {/* NO */}
-                    <td className="py-3 px-3 text-center text-gray-500 text-sm align-top pt-4">
-                      {index + 1}
-                    </td>
-
-                    {/* ITEMS/SERVICES */}
-                    <td className="py-3 px-3">
-                      <Select value={item.name} onValueChange={(value) => updateItem(item.id, 'name', value)}>
-                        <SelectTrigger><SelectValue placeholder="Select Item" /></SelectTrigger>
-                        <SelectContent>
-                          {mockItems.map(mockItem => (
-                            <SelectItem key={mockItem.id} value={mockItem.productName}>{mockItem.productName}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-
-                    {/* UNIT */}
-                    <td className="py-3 px-3">
-                      <Select value={item.unit} onValueChange={(value) => updateItem(item.id, 'unit', value)}>
-                        <SelectTrigger><SelectValue placeholder="Unit" /></SelectTrigger>
-                        <SelectContent>
-                          {mockQuantities.map(q => (
-                            <SelectItem key={q.id} value={q.unit}>{q.unit}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-
-                    {/* QTY */}
-                    <td className="py-3 px-3">
-                      <Select 
-                        value={String(item.qty)} 
-                        onValueChange={(value) => updateItem(item.id, 'qty', parseFloat(value) || 0)}
-                      >
-                        <SelectTrigger><SelectValue placeholder="Qty" /></SelectTrigger>
-                        <SelectContent>
-                          {mockQuantities.map(q => (
-                            <SelectItem key={q.id} value={String(q.value)}>{q.value}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-
-                    {/* PRICE */}
-                    <td className="py-3 px-3">
-                      <Input 
-                        type="number" 
-                        value={item.price} 
-                        onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                        className="text-right"
-                      />
-                    </td>
-
-                    {/* DISCOUNT */}
-                    <td className="py-3 px-3">
-                      <Input 
-                        type="number" 
-                        placeholder="0.00"
-                        value={item.discount} 
-                        onChange={(e) => updateItem(item.id, 'discount', parseFloat(e.target.value) || 0)}
-                        className="text-right"
-                      />
-                    </td>
-
-                    {/* TAX */}
-                    <td className="py-3 px-3">
-                      <Input 
-                        type="number" 
-                        placeholder="%"
-                        value={item.tax} 
-                        onChange={(e) => updateItem(item.id, 'tax', parseFloat(e.target.value) || 0)}
-                        className="text-right"
-                      />
-                    </td>
-
-                    {/* AMOUNT */}
-                    <td className="py-3 px-3 text-right font-medium text-gray-800 pt-4">
-                      ₹ {item.amount.toFixed(2)}
-                    </td>
-
-                    {/* ACTIONS */}
-                    <td className="py-3 px-3 text-center pt-3">
-                       <button 
-                         onClick={() => handleDeleteItem(item.id)} 
-                         className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                       >
-                         <Trash2 className="h-4 w-4" />
-                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Add Item Bar */}
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex gap-4">
-                <button 
-                  onClick={handleAddItem}
-                  className="flex-1 border-2 border-dashed border-blue-300 rounded-md p-3 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors text-blue-500 font-medium text-sm gap-2"
-                >
-                  <Plus className="h-4 w-4" /> Add Item
-                </button>
-                <div className="w-48">
-                  <Button variant="outline" className="w-full h-full border-gray-300 text-gray-700 gap-2 font-normal">
-                    <ScanBarcode className="h-5 w-5" />
-                    Scan Barcode
-                  </Button>
-                </div>
-              </div>
-            </div>
+          {/* --- ITEMS TABLE --- */}
+          <div className="block">
+            <ItemsTable
+              items={items}
+              handleAddItem={handleAddItem}
+              handleDeleteItem={handleDeleteItem}
+              updateItem={updateItem}
+              view={view} />
+          </div>
 
              {/* Subtotal Row */}
              {/* <div className="flex justify-end pt-4 pr-12 pb-4 gap-12 text-sm border-t border-gray-100 bg-white">
@@ -326,7 +238,7 @@ const POScreen = () => {
           </div>
 
           {/* --- BOTTOM SECTION --- */}
-          <div className="flex flex-col lg:flex-row border-t border-gray-200">
+          <div className="flex flex-col lg:flex-row border-t border-gray-200 print-hide">
             
             {/* Left: Notes & Terms */}
             <div className="w-full lg:w-1/2 p-0 space-y-6 border-r border-gray-200">
@@ -441,7 +353,7 @@ const POScreen = () => {
                {/* <div className="border-t border-gray-100 my-4"></div> */}
                
                {/* Payment Section */}
-               <div className="space-y-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+               <div className="space-y-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100 print-hide">
                   <div className="flex justify-end">
                      <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-600 cursor-pointer select-none" htmlFor="full-paid">Mark as fully paid</label>
@@ -488,7 +400,7 @@ const POScreen = () => {
                   </div>
                </div>
             </div>
-
+            
             {/* Right: Signature */}
             {/* <div className="w-full lg:w-1/2 p-6 flex flex-col justify-end items-end">
                <div className="w-full max-w-xs text-center">
@@ -504,7 +416,6 @@ const POScreen = () => {
 
         </div>
       </div>
-    </div>
   );
 };
 

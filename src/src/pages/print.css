@@ -1,0 +1,27 @@
+/* src/pages/print.css */
+
+@media print {
+  /* Hide everything on the page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make only the print component and its children visible */
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+
+  .print-only {
+    /* Position the print component to take up the whole page */
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Legacy hide classes (can be removed if no longer used) */
+  .print-hide {
+    display: none !important;
+  }
+
+}
