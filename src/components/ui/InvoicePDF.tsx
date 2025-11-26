@@ -39,9 +39,10 @@ interface InvoicePDFProps {
   totals: Totals;
   globalState: GlobalState;
   supplier: Supplier | null;
+  invoiceType: 'purchase' | 'scales'; // Added invoiceType prop
 }
 
-const InvoicePDF: React.FC<InvoicePDFProps> = ({ items, totals, globalState, supplier }) => {
+const InvoicePDF: React.FC<InvoicePDFProps> = ({ items, totals, globalState, supplier, invoiceType }) => {
   return (
     <div style={{
       backgroundColor: '#ffffff',
@@ -61,7 +62,7 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ items, totals, globalState, sup
       <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px', paddingBottom: '16px', borderBottom: '2px solid #111827' }}>
         {/* Bill From */}
         <div style={{ fontSize: '12px' }}>
-          <h2 style={{ fontWeight: '600', color: '#1F2937', marginBottom: '4px' }}>Bill From:</h2>
+          <h2 style={{ fontWeight: '600', color: '#1F2937', marginBottom: '4px' }}>{invoiceType === 'purchase' ? 'Bill From:' : 'Bill To:'}</h2>
           <p style={{ fontWeight: 'bold', fontSize: '16px', margin: 0 }}>{supplier?.name || 'N/A'}</p>
           <p style={{ margin: 0 }}>{supplier?.address || 'Supplier address not available'}</p>
         </div>

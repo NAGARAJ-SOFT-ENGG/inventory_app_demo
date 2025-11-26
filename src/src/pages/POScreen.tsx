@@ -173,7 +173,7 @@ const POScreen = () => {
   };
 
   const handlePrint = () => {
-    generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier);
+    generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier, 'purchase');
   };
 
   return (

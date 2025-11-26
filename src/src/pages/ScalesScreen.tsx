@@ -270,7 +270,7 @@ const ScalesScreen = () => {
     invoiceNo: "1",
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    supplierName: "", // Add supplier name to global state
+    supplierName: "Walk in", // Add supplier name to global state
     paymentTerms: "30",
     roundOff: 0,
     isAutoRoundOff: true,
@@ -368,7 +368,7 @@ const ScalesScreen = () => {
   };
 
   const handlePrint = () => {
-    generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier);
+    generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier, 'scales');
   };
 
   return (
@@ -403,9 +403,10 @@ const ScalesScreen = () => {
                   onValueChange={(value) => setGlobalState({...globalState, supplierName: value})}
                 >
                   <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Select a supplier" />
+                    <SelectValue placeholder="Select Customer" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Walk in">Walk in</SelectItem>
                     {mockSuppliers.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.name}>{supplier.name}</SelectItem>
                     ))}
