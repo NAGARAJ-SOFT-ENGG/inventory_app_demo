@@ -43,65 +43,64 @@ interface InvoicePDFProps {
 
 const InvoicePDF: React.FC<InvoicePDFProps> = ({ items, totals, globalState, supplier }) => {
   return (
-    <div className="bg-white text-gray-900 font-sans p-8" id="invoice-content">
+    <div style={{
+      backgroundColor: '#ffffff',
+      color: '#111827',
+      fontFamily: 'sans-serif',
+      padding: '32px',
+      width: '800px',
+    }} id="invoice-content">
+
       {/* --- COMPANY HEADER (Centered) --- */}
-      <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Inventory Application</h1>
-        <p className="text-sm text-gray-600">123 Your Street, Your City, 12345 | your.email@example.com</p>
+      <header style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Inventory Application</h1>
+        <p style={{ fontSize: '12px', color: '#4B5563', margin: 0 }}>123 Your Street, Your City, 12345 | your.email@example.com</p>
       </header>
 
       {/* --- BILLING & INVOICE INFO --- */}
-      <section className="grid grid-cols-2 gap-8 mb-8 pb-4 border-b-2 border-gray-900">
-        {/* Bill From (Left) */}
-        <div className="text-sm">
-          <h2 className="font-semibold text-gray-800 mb-1">Bill From:</h2>
-          <p className="font-bold text-lg">{supplier?.name || 'N/A'}</p>
-          <p>{supplier?.address || 'Supplier address not available'}</p>
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px', paddingBottom: '16px', borderBottom: '2px solid #111827' }}>
+        {/* Bill From */}
+        <div style={{ fontSize: '12px' }}>
+          <h2 style={{ fontWeight: '600', color: '#1F2937', marginBottom: '4px' }}>Bill From:</h2>
+          <p style={{ fontWeight: 'bold', fontSize: '16px', margin: 0 }}>{supplier?.name || 'N/A'}</p>
+          <p style={{ margin: 0 }}>{supplier?.address || 'Supplier address not available'}</p>
         </div>
 
-        {/* Bill To (Right) */}
-        {/* <div className="text-right text-sm">
-          <h2 className="font-semibold text-gray-800 mb-1">Bill To:</h2>
-          <p className="font-bold text-lg">Inventory Application</p>
-          <p>123 Your Street, Your City, 12345</p>
-        </div> */}
-          <div className="text-right">
-          <p><span className="font-semibold">Invoice #:</span> {globalState.invoiceNo}</p>
-          <p><span className="font-semibold">Date:</span> {globalState.date}</p>
-          <p><span className="font-semibold">Due Date:</span> {globalState.dueDate}</p>
+        {/* Invoice Info */}
+        <div style={{ textAlign: 'right', fontSize: '12px' }}>
+          <p><span style={{ fontWeight: '600' }}>Invoice #:</span> {globalState.invoiceNo}</p>
+          <p><span style={{ fontWeight: '600' }}>Date:</span> {globalState.date}</p>
+          <p><span style={{ fontWeight: '600' }}>Due Date:</span> {globalState.dueDate}</p>
         </div>
       </section>
 
-      {/* --- INVOICE DETAILS --- */}
-      {/* <section className="flex justify-between items-center mb-8 text-sm">
-        <h2 className="text-2xl font-bold uppercase text-gray-900">INVOICE</h2>
-      
-      </section> */}
-
       {/* --- ITEMS TABLE --- */}
-      <section className="mt-8">
-        <table className="w-full text-left border-collapse">
+      <section style={{ marginTop: '32px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
           <thead>
-            <tr className="bg-slate-200 border-b border-slate-300">
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700">#</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 w-2/5">Item</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 text-right">Qty</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 text-right">Price</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 text-right">Discount</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 text-right">Tax</th>
-              <th className="px-4 py-3 text-sm font-semibold uppercase text-slate-700 text-right">Amount</th>
+            <tr style={{ backgroundColor: '#E2E8F0', borderBottom: '1px solid #CBD5E1' }}>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'left' }}>#</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'left', width: '40%' }}>Item</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'right' }}>Qty</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'right' }}>Price</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'right' }}>Discount</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'right' }}>Tax</th>
+              <th style={{ padding: '12px', fontWeight: '600', textTransform: 'uppercase', textAlign: 'right' }}>Amount</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item, index) => (
-              <tr key={item.id} className="border-b border-slate-200 odd:bg-white even:bg-slate-50">
-                <td className="px-4 py-3">{index + 1}</td>
-                <td className="px-4 py-3">{item.name}</td>
-                <td className="px-4 py-3 text-right">{item.qty}</td>
-                <td className="px-4 py-3 text-right">₹{Number(item.price).toFixed(2)}</td>
-                <td className="px-4 py-3 text-right">₹{Number(item.discount).toFixed(2)}</td>
-                <td className="px-4 py-3 text-right">{Number(item.tax)}%</td>
-                <td className="px-4 py-3 text-right font-medium">₹{item.amount.toFixed(2)}</td>
+              <tr key={item.id} style={{
+                borderBottom: '1px solid #E5E7EB',
+                backgroundColor: index % 2 === 0 ? '#ffffff' : '#F8FAFC'
+              }}>
+                <td style={{ padding: '12px' }}>{index + 1}</td>
+                <td style={{ padding: '12px' }}>{item.name}</td>
+                <td style={{ padding: '12px', textAlign: 'right' }}>{item.qty}</td>
+                <td style={{ padding: '12px', textAlign: 'right' }}>₹{Number(item.price).toFixed(2)}</td>
+                <td style={{ padding: '12px', textAlign: 'right' }}>₹{Number(item.discount).toFixed(2)}</td>
+                <td style={{ padding: '12px', textAlign: 'right' }}>{Number(item.tax)}%</td>
+                <td style={{ padding: '12px', textAlign: 'right', fontWeight: '500' }}>₹{item.amount.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -109,32 +108,33 @@ const InvoicePDF: React.FC<InvoicePDFProps> = ({ items, totals, globalState, sup
       </section>
 
       {/* --- TOTALS SECTION --- */}
-      <section className="flex justify-end my-6">
-        <div className="w-full max-w-sm space-y-2 text-sm">
-          {/* <div className="flex justify-between"><span className="text-gray-600">Subtotal:</span><span className="font-medium">₹{totals.subtotal.toFixed(2)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-600">Total Discount:</span><span className="font-medium">- ₹{totals.totalDiscount.toFixed(2)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-600">Taxable Amount:</span><span className="font-medium">₹{totals.taxableAmount.toFixed(2)}</span></div>
-          <div className="flex justify-between pb-2 border-b"><span className="text-gray-600">Total Tax:</span><span className="font-medium">₹{totals.totalTax.toFixed(2)}</span></div> */}
-          <div className="flex justify-between pt-2 text-lg font-bold"><span >TOTAL:</span><span>₹{totals.total.toFixed(2)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-600">Amount Paid:</span><span className="font-medium">₹{Number(globalState.amountPaid).toFixed(2)}</span></div>
-          <div className="flex justify-between text-lg font-bold text-green-600"><span>Balance Due:</span><span>₹{totals.balanceDue > 0 ? totals.balanceDue.toFixed(2) : '0.00'}</span></div>
+      <section style={{ display: 'flex', justifyContent: 'flex-end', margin: '24px 0' }}>
+        <div style={{ width: '100%', maxWidth: '240px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', paddingTop: '8px' }}>
+            <span>TOTAL:</span><span>₹{totals.total.toFixed(2)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#4B5563' }}>Amount Paid:</span><span style={{ fontWeight: '500' }}>₹{Number(globalState.amountPaid).toFixed(2)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold', color: '#059669' }}>
+            <span>Balance Due:</span><span>₹{totals.balanceDue > 0 ? totals.balanceDue.toFixed(2) : '0.00'}</span>
+          </div>
         </div>
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="mt-12 pt-6  flex justify-between items-end">
-    
-        {/* Left: Terms & Conditions */}
-        <div className="text-xs text-gray-600 text-left">
-          <h3 className="font-semibold mb-1">Terms & Conditions</h3>
-          <p>1. Goods once sold will not be taken back or exchanged.</p>
-          <p>2. All disputes are subject to local jurisdiction only.</p>
+      <footer style={{ marginTop: '48px', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '10px', color: '#4B5563' }}>
+        {/* Terms */}
+        <div style={{ textAlign: 'left' }}>
+          <h3 style={{ fontWeight: '600', marginBottom: '4px' }}>Terms & Conditions</h3>
+          <p style={{ margin: 0 }}>1. Goods once sold will not be taken back or exchanged.</p>
+          <p style={{ margin: 0 }}>2. All disputes are subject to local jurisdiction only.</p>
         </div>
 
-          {/* Right: Authority Signature */}
-        <div className="text-xs text-gray-600">
-          <div className="w-48 border-b-2 border-gray-400 mb-6"></div>
-          <p className="font-semibold">Authorised Signatory</p>
+        {/* Signature */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '192px', borderBottom: '2px solid white', marginBottom: '24px' }}></div>
+          <p style={{ fontWeight: '600', margin: 0 }}>Authorised Signatory</p>
         </div>
       </footer>
     </div>
