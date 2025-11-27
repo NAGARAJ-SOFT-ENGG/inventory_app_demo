@@ -204,6 +204,19 @@ export const mockScalesItems: ScalesItem[] = [
     driverName: "Sam Wilson",
     mobileNumber: "6543210987",
   },
+  {
+    id: "scale-5",
+    supplierName: "Supplier B",
+    productName: "Gravel",
+    qty: 15,
+    price: 1200,
+    date: "2025-11-01",
+    time: "11:00",
+    vehicleNumber: "KL05MN7890",
+    transportName: "Rock Solid Transport",
+    driverName: "Alex Ray",
+    mobileNumber: "9988776655",
+  },
 ];
 
 export const mockPOItems = [
@@ -231,7 +244,43 @@ export const mockPOItems = [
     driverName: "Jane Smith",
     mobileNumber: "8765432109",
   },
+  {
+    id: "po-003",
+    supplierName: "Supplier C",
+    productName: "Red Bricks",
+    qty: 2500,
+    date: "2025-11-22",
+    time: "09:45",
+    vehicleNumber: "MH12PQ1234",
+    transportName: "BuildFast Supplies",
+    driverName: "Chris Green",
+    mobileNumber: "7766554433",
+  },
 ];
+
+export const mockEditHistory = [
+  {
+    id: "edit-1",
+    invoiceNo: "scale-1",
+    date: "2025-10-27",
+    field: "Price",
+    oldValue: "340",
+    newValue: "350",
+    user: "Admin",
+    type: "scales"
+  },
+  {
+    id: "edit-2",
+    invoiceNo: "po-002",
+    date: "2025-11-21",
+    field: "Qty",
+    oldValue: "45",
+    newValue: "50",
+    user: "Manager",
+    type: "purchase"
+  },
+];
+
 
 export const mockEmployees: Employee[] = [
   {

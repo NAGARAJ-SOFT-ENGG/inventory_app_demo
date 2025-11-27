@@ -1,116 +1,183 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, BarChart2, DollarSign, Scale, Download } from 'lucide-react';
+import { FileText, BarChart2, DollarSign, Scale, Download, File, Filter, Calendar, Hash } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { generatePDF } from '../utils/pdfGenerator';
+import { generateExcel } from '../utils/excelGenerator';
 
 // Import mock data from various sources
-import { mockPOItems, mockScalesItems, mockInventory, mockPrices } from '../data/mockData';
-
-const ReportCard = ({ icon, title, description, onGenerate }: { icon: React.ElementType, title: string, description: string, onGenerate: () => void }) => {
-  const Icon = icon;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col"
-    >
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h3 className="text-lg text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600 mt-1">{description}</p>
-        </div>
-      </div>
-      <div className="mt-6 flex-grow flex items-end">
-        <Button onClick={onGenerate} variant="outline" className="w-full">
-          <Download className="w-4 h-4 mr-2" />
-          Generate Report
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
+import { mockPOItems, mockScalesItems, mockEditHistory } from '../data/mockData';
 
 export const ReportsPage: React.FC = () => {
+  const [reportType, setReportType] = useState('scales');
+  const [summaryType, setSummaryType] = useState('detailed');
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    invoiceNo: '',
+  });
+  const [reportData, setReportData] = useState<any[]>([]);
+  const [reportHeaders, setReportHeaders] = useState<string[]>([]);
 
-  const generatePOReport = () => {
-    const headers = ["Supplier", "Product", "Qty", "Date", "Time", "Vehicle No.", "Driver"];
-    const data = mockPOItems.map(item => [
-      item.supplierName,
-      item.productName,
-      item.qty.toString(),
-      item.date,
-      item.time,
-      item.vehicleNumber,
-      item.driverName,
-    ]);
-    generatePDF("Purchase Order Report", headers, data, "po-report.pdf");
+  const handleGenerateReport = () => {
+    let data = [];
+    let headers: string[] = [];
+
+    // 1. Select Data Source
+    if (reportType === 'scales') {
+      data = mockScalesItems;
+      headers = ["Date", "Invoice #", "Supplier", "Product", "Qty", "Price", "Vehicle No."];
+    } else if (reportType === 'purchase') {
+      data = mockPOItems;
+      headers = ["Date", "Invoice #", "Supplier", "Product", "Qty", "Vehicle No.", "Driver"];
+    } else if (reportType === 'editHistory') {
+      // Mock edit history data for demonstration
+      data = mockEditHistory;
+      headers = ["Date", "Invoice #", "Field Changed", "Old Value", "New Value", "Changed By"];
+    }
+
+    // 2. Apply Filters
+    let filteredData = data.filter(item => {
+      const itemDate = new Date(item.date);
+      const startDate = filters.startDate ? new Date(filters.startDate) : null; 
+      const endDate = filters.endDate ? new Date(filters.endDate) : null; 
+
+      // Adjust endDate to be the end of the selected day to include all items on that day
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+      }
+
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      if (filters.invoiceNo && item.invoiceNo && !item.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase())) return false;
+      
+      return true;
+    });
+
+    // 3. Apply Summarization (structure for future implementation)
+    if (summaryType === 'item') {
+      // TODO: Implement item-wise summary logic
+      // Example: Group by `productName` and sum `qty` and `price`
+    } else if (summaryType === 'party') {
+      // TODO: Implement party-wise summary logic
+      // Example: Group by `supplierName` and sum totals
+    }
+
+    // 4. Format data for display and export
+    const formattedData = filteredData.map(item => {
+        if (reportType === 'scales') return [item.date, item.id, item.supplierName, item.productName, item.qty, `$${item.price.toFixed(2)}`, item.vehicleNumber];
+        if (reportType === 'purchase') return [item.date, item.id, item.supplierName, item.productName, item.qty, item.vehicleNumber, item.driverName];
+        if (reportType === 'editHistory') return [item.date, item.invoiceNo, item.field, item.oldValue, item.newValue, item.user];
+        return Object.values(item);
+    });
+
+    setReportHeaders(headers);
+    setReportData(formattedData);
   };
 
-  const generateScalesReport = () => {
-    const headers = ["Supplier", "Product", "Qty", "Price", "Date", "Time", "Vehicle No."];
-    const data = mockScalesItems.map(item => [
-      item.supplierName,
-      item.productName,
-      item.qty.toString(),
-      `$${item.price.toFixed(2)}`,
-      item.date,
-      item.time,
-      item.vehicleNumber,
-    ]);
-    generatePDF("Scales Report", headers, data, "scales-report.pdf");
+  const handleExportPDF = () => {
+    if (reportData.length === 0) return;
+    const title = `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`;
+    generatePDF(title, reportHeaders, reportData, `${reportType}-report.pdf`);
   };
 
-  const generateStockReport = () => {
-    const headers = ["Item", "SKU", "Category", "Quantity", "Price", "Status"];
-    const data = mockInventory.map(item => [
-      item.name,
-      item.sku,
-      item.category,
-      item.quantity.toString(),
-      `$${item.price.toFixed(2)}`,
-      item.status.replace('-', ' ').toUpperCase(),
-    ]);
-    generatePDF("Stock Inventory Report", headers, data, "stock-report.pdf");
-  };
-
-  const generatePriceReport = () => {
-    const headers = ["Unit", "Price"];
-    const data = mockPrices.map(item => [
-      item.unit.toUpperCase(),
-      `$${item.price.toFixed(2)}`,
-    ]);
-    generatePDF("Price Master Report", headers, data, "price-report.pdf");
-  };
-
-  const reports = [
-    { icon: FileText, title: "PO Report", description: "Detailed list of all Purchase Orders.", onGenerate: generatePOReport },
-    { icon: Scale, title: "Scales Report", description: "Complete log of all scale entries.", onGenerate: generateScalesReport },
-    { icon: BarChart2, title: "Stock Report", description: "Current status of all inventory items.", onGenerate: generateStockReport },
-    { icon: DollarSign, title: "Price Report", description: "Master list of all pricing units.", onGenerate: generatePriceReport },
-  ];
+  const handleExportExcel = () => {
+    if (reportData.length === 0) return;
+    generateExcel(reportHeaders, reportData, `${reportType}-report.xlsx`);
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-gray-900 mb-2">Reports Center</h2>
-        <p className="text-gray-600">Generate and download system reports as PDF documents.</p>
+        <p className="text-gray-600">Generate and download system reports.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {reports.map((report, index) => (
-          <ReportCard
-            key={index}
-            icon={report.icon}
-            title={report.title}
-            description={report.description}
-            onGenerate={report.onGenerate}
-          />
-        ))}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+        {/* Filters Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <Label>Report Type</Label>
+            <Select value={reportType} onValueChange={setReportType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="scales">Scales Report</SelectItem>
+                <SelectItem value="purchase">Purchase Report</SelectItem>
+                <SelectItem value="editHistory">Edit History Report</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Summary Type</Label>
+            <Select value={summaryType} onValueChange={setSummaryType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="detailed">Detailed View</SelectItem>
+                <SelectItem value="item">Item-wise Summary</SelectItem>
+                <SelectItem value="party">Party-wise Summary</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+          <div className="space-y-2">
+            <Label htmlFor="startDate">Start Date</Label>
+            <Input id="startDate" type="date" value={filters.startDate} onChange={e => setFilters({...filters, startDate: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="endDate">End Date</Label>
+            <Input id="endDate" type="date" value={filters.endDate} onChange={e => setFilters({...filters, endDate: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="invoiceNo">Invoice Number</Label>
+            <Input id="invoiceNo" placeholder="Filter by Invoice #" value={filters.invoiceNo} onChange={e => setFilters({...filters, invoiceNo: e.target.value})} />
+          </div>
+        </div>
+        <div className="flex justify-end gap-3">
+            <Button onClick={handleGenerateReport} variant="gradient">
+                <Filter className="w-4 h-4 mr-2" /> Generate Report
+            </Button>
+        </div>
+      </div>
+
+      {/* Report Preview Section */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="p-6 flex justify-between items-center">
+            <h3 className="text-lg text-gray-900">Report Preview</h3>
+            <div className="flex gap-2">
+                <Button onClick={handleExportExcel} variant="outline" disabled={reportData.length === 0}>
+                    <File className="w-4 h-4 mr-2" /> Export to Excel
+                </Button>
+                <Button onClick={handleExportPDF} variant="outline" disabled={reportData.length === 0}>
+                    <Download className="w-4 h-4 mr-2" /> Export to PDF
+                </Button>
+            </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                {reportHeaders.map(header => <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{header}</th>)}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {reportData.length > 0 ? reportData.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cell: any, cellIndex: number) => <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{cell}</td>)}
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan={reportHeaders.length || 1} className="text-center py-10 text-gray-500">
+                    Generate a report to see the data here.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

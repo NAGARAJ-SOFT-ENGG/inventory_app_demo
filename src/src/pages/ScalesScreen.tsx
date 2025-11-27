@@ -244,6 +244,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import ItemsTable from "../../components/ui/itemsTable";
+import { Textarea } from "../../components/ui/textarea";
 import { generatePurchaseInvoicePDF } from "../utils/purchaseInvoiceGenerator";
 
 
@@ -273,11 +274,17 @@ const ScalesScreen = () => {
     supplierName: "Walk in", // Add supplier name to global state
     paymentTerms: "30",
     roundOff: 0,
-    isAutoRoundOff: true,
-    amountPaid: 0,
-    paymentMode: "Cash",
     termsVisible: true,
+    payments: [{ mode: "Cash", amount: 0 }],
+    discountType: 'Percentage',
+    discountValue: 0,
+    vehicleNumber: "",
+    driverName: "",
+    driverMobileNumber: "",
   });
+
+
+
 
   const selectedSupplier = React.useMemo(() => {
     return mockSuppliers.find(s => s.name === globalState.supplierName) || null;
@@ -306,21 +313,27 @@ const ScalesScreen = () => {
     const totalTax = items.reduce((sum, item) => sum + ((item.qty * item.price) - (parseFloat(String(item.discount)) || 0)) * ((parseFloat(String(item.tax)) || 0) / 100), 0);
     
     let total = subtotal - totalDiscount + totalTax;
-    
-    // Round Off Logic
-    let roundOffValue = 0;
-    if (globalState.isAutoRoundOff) {
-      const rounded = Math.round(total);
-      roundOffValue = rounded - total;
-      total = rounded;
-    } else {
-      total += parseFloat(String(globalState.roundOff)) || 0;
-      roundOffValue = parseFloat(String(globalState.roundOff)) || 0;
+
+    let globalDiscountAmount = 0;
+    if (globalState.discountType === 'Percentage') {
+      globalDiscountAmount = (total * (globalState.discountValue || 0)) / 100;
+    } else { // Amount
+      globalDiscountAmount = globalState.discountValue || 0;
     }
+    total -= globalDiscountAmount;
 
-    const balanceDue = total - (parseFloat(String(globalState.amountPaid)) || 0);
+    const roundedTotal = Math.round(total);
+    const roundOffValue = roundedTotal - total;
+    total = roundedTotal;
 
-    return { subtotal, totalDiscount, taxableAmount, totalTax, total, roundOffValue, balanceDue };
+    const totalAmountPaid = globalState.payments.reduce(
+      (sum, p) => sum + (p.amount || 0),
+      0
+    );
+    const balanceDue = total - totalAmountPaid;
+
+
+    return { subtotal, totalDiscount, taxableAmount, totalTax, total, roundOffValue, balanceDue, totalAmountPaid, globalDiscountAmount };
   }, [items, globalState]);
 
   // --- HANDLERS ---
@@ -366,6 +379,22 @@ const ScalesScreen = () => {
       return item;
     }));
   };
+
+  const handleAddPayment = () => {
+    setGlobalState((prevState) => ({
+      ...prevState,
+      payments: [...prevState.payments, { mode: "Cash", amount: 0 }],
+    }));
+  };
+
+  const handleRemovePayment = (index: number) => {
+    setGlobalState((prevState) => ({
+      ...prevState,
+      payments: prevState.payments.filter((_, i) => i !== index),
+    }));
+  };
+
+  const totalAmountPaid = globalState.payments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
   const handlePrint = () => {
     generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier, 'scales');
@@ -447,6 +476,37 @@ const ScalesScreen = () => {
             </div>
           </div>
 
+          {/* Vehicle & Transport Details */}
+          <div className="p-4 border-b border-gray-200 space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700">Vehicle & Transport Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label>Vehicle Number</Label>
+                <Input
+                  value={globalState.vehicleNumber}
+                  onChange={(e) => setGlobalState({ ...globalState, vehicleNumber: e.target.value })}
+                  placeholder="e.g., KA01AB1234"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Driver Name</Label>
+                <Input
+                  value={globalState.driverName}
+                  onChange={(e) => setGlobalState({ ...globalState, driverName: e.target.value })}
+                  placeholder="e.g., John Doe"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Driver Mobile Number</Label>
+                <Input
+                  value={globalState.driverMobileNumber}
+                  onChange={(e) => setGlobalState({ ...globalState, driverMobileNumber: e.target.value })}
+                  placeholder="e.g., +919876543210"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* --- ITEMS TABLE --- */}
           <div className="block">
             <ItemsTable
@@ -463,12 +523,48 @@ const ScalesScreen = () => {
           <div className="flex flex-col lg:flex-row border-t border-gray-200 print-hide">
             
             {/* Left: Notes & Terms */}
-            <div className="w-full lg:w-1/2 p-0 space-y-6 border-r border-gray-200">
+            <div className="w-full lg:w-1/2 p-4 space-y-4 border-r border-gray-200 bg-white">
+              <div className="space-y-2">
+                <Label htmlFor="remarks" className="text-gray-700 font-semibold">Remarks / Notes</Label>
+                <Textarea
+                  id="remarks"
+                  placeholder="Enter any remarks for the invoice..."
+                  value={globalState.remarks}
+                  onChange={(e) => setGlobalState({ ...globalState, remarks: e.target.value })}
+                  className="min-h-[80px]"
+                />
+              </div>
             </div>
 
             {/* Right: Calculations */}
             <div className="w-full lg:w-1/2 p-2 space-y-3 bg-white">
                
+               {/* Discount */}
+               <div className="flex justify-between items-center text-sm px-2">
+                 <span className="text-gray-600">Discount</span>
+                 <div className="flex items-center gap-2">
+                   <Input
+                     type="number"
+                     placeholder="0"
+                     value={globalState.discountValue || ''}
+                     onChange={(e) => setGlobalState({ ...globalState, discountValue: parseFloat(e.target.value) || 0 })}
+                     className="w-24 h-8 text-right"
+                   />
+                   <Select
+                     value={globalState.discountType}
+                     onValueChange={(value) => setGlobalState({ ...globalState, discountType: value })}
+                   >
+                     <SelectTrigger className="w-20 h-8">
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="Percentage">%</SelectItem>
+                       <SelectItem value="Amount">₹</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+               </div>
+
                {/* Total Amount */}
                <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-bold text-gray-800">Total Amount</span>
@@ -484,44 +580,72 @@ const ScalesScreen = () => {
                         <label className="text-xs text-gray-600 cursor-pointer select-none" htmlFor="full-paid">Mark as fully paid</label>
                         <input 
                            id="full-paid" 
-                           type="checkbox" 
-                           onChange={(e) => {
-                             if(e.target.checked) setGlobalState({...globalState, amountPaid: totals.total});
-                             else setGlobalState({...globalState, amountPaid: 0});
-                           }}
+                           type="checkbox"
+                            onChange={(e) =>
+                              setGlobalState((prevState) => ({
+                                ...prevState,
+                                payments: e.target.checked
+                                  ? [{ mode: "Cash", amount: totals.total }]
+                                  : [{ mode: "Cash", amount: 0 }],
+                              }))
+                            }
                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 h-4 w-4" 
                         />
                      </div>
                   </div>
                   
-                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-  <span className="text-sm font-medium text-gray-600">Amount Paid ₹</span>
-  
-  <div className="flex flex-col sm:flex-row flex-1 gap-2 w-full">
-    <div className="relative flex-1">
-      <span className="absolute left-3 top-4 text-gray-1000 font-medium"></span>
-      <Input 
-        className="bg-gray-100 w-full"
-        value={globalState.amountPaid || ''}
-        onChange={(e) => setGlobalState({...globalState, amountPaid: parseFloat(e.target.value) || 0})}
-      />
-    </div>
+                  {globalState.payments.map((payment, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <span className="text-sm font-medium text-gray-600">Payment {index + 1}</span>
+                      <div className="flex flex-col sm:flex-row flex-1 gap-2 w-full">
+                        <div className="relative flex-1">
+                          <Input
+                            type="number"
+                            placeholder="Amount"
+                            className="bg-white w-full"
+                            value={payment.amount || ""}
+                            onChange={(e) => {
+                              const newPayments = [...globalState.payments];
+                              newPayments[index].amount = parseFloat(e.target.value) || 0;
+                              setGlobalState({ ...globalState, payments: newPayments });
+                            }}
+                          />
+                        </div>
+                        <Select
+                          value={payment.mode}
+                          onValueChange={(value) => {
+                            const newPayments = [...globalState.payments];
+                            newPayments[index].mode = value;
+                            setGlobalState({ ...globalState, payments: newPayments });
+                          }}
+                        >
+                          <SelectTrigger className="w-40 bg-white"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Cash">Cash</SelectItem>
+                            <SelectItem value="UPI/Bank Transfer">UPI/Bank Transfer</SelectItem>
+                            <SelectItem value="Card">Card</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {globalState.payments.length > 1 && (
+                          <Button variant="ghost" size="icon" onClick={() => handleRemovePayment(index)} className="text-red-500 hover:bg-red-100">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
 
-    <Select 
-      value={globalState.paymentMode}
-      onValueChange={(value) => setGlobalState({...globalState, paymentMode: value})}
-    >
-      <SelectTrigger className="w-32 bg-white"><SelectValue /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value="Cash">Cash</SelectItem>
-        <SelectItem value="Bank">Bank</SelectItem>
-        <SelectItem value="Cheque">Cheque</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-</div>
+                  <div className="flex justify-start">
+                    <Button variant="link" onClick={handleAddPayment} className="p-0 h-auto text-blue-600">
+                      <Plus className="h-4 w-4 mr-1" /> Add another payment
+                    </Button>
+                  </div>
 
-
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                    <span className="text-sm font-medium text-gray-600">Total Paid</span>
+                    <span className="font-semibold text-gray-800">₹ {totalAmountPaid.toFixed(2)}</span>
+                  </div>
+                  
                   <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                      <span className="text-green-600 font-medium text-sm">Balance Amount</span>
                      <span className="text-green-600 font-bold text-lg">₹ {totals.balanceDue > 0 ? (totals.balanceDue || 0).toFixed(2) : '0.00'}</span>
@@ -529,7 +653,6 @@ const ScalesScreen = () => {
                </div>
             </div>
           </div>
-
         </div>
     </div>
   );
