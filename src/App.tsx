@@ -25,6 +25,7 @@ import { ItemMasterPage } from "./src/pages/ItemMasterPage";
 import { SupplierMasterPage } from "./src/pages/SupplierMasterPage";
 import { PriceMasterPage } from "./src/pages/PriceMasterPage";
 import { QtyMasterPage } from "./src/pages/QtyMasterPage";
+import { PurchaseReturnsPage } from "./src/pages/PurchaseReturnsPage";
 import ScalesScreen from "./src/pages/ScalesScreen";
 import { ReportsPage } from "./src/pages/ReportsPage";
 
@@ -150,6 +151,14 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute requireAdmin>
               <QtyMasterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="purchase-returns"
+          element={
+            <ProtectedRoute requireAdmin>
+              <PurchaseReturnsPage />
             </ProtectedRoute>
           }
         />

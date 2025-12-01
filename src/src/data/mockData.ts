@@ -8,6 +8,22 @@ import { Item } from "../models/item.model";
 import { Price } from "../models/price.model";
 import { Quantity } from "../models/quantity.model";
 
+export interface PurchaseItem {
+  id: string;
+  name: string;
+  purchasedQuantity: number;
+  returnedQuantity: number; // To track how much has been returned
+  unitPrice: number;
+  scaled: boolean; // True if item has gone to scales, cannot be returned
+}
+export interface PurchaseInvoice {
+  id: string;
+  invoiceNumber: string;
+  supplierName: string;
+  purchaseDate: string;
+  items: PurchaseItem[];
+}
+
 export const mockProducts: Product[] = [
   {
     id: "prod-001",
@@ -639,5 +655,30 @@ export const mockStockMovements: StockMovement[] = [
     date: "2025-11-03T14:15:00Z",
     reason: "Sales Order #SO-123",
     performedBy: "Sales Team",
+  },
+];
+
+export const mockPurchaseInvoices: PurchaseInvoice[] = [
+  {
+    id: "PI001",
+    invoiceNumber: "INV-2023-001",
+    supplierName: "Supplier A",
+    purchaseDate: "2023-10-20",
+    items: [
+      { id: "ITEM001", name: "Laptop", purchasedQuantity: 5, returnedQuantity: 0, unitPrice: 1200, scaled: false },
+      { id: "ITEM002", name: "Mouse", purchasedQuantity: 10, returnedQuantity: 0, unitPrice: 25, scaled: true },
+      { id: "ITEM003", name: "Keyboard", purchasedQuantity: 8, returnedQuantity: 0, unitPrice: 75, scaled: false },
+    ],
+  },
+  {
+    id: "PI002",
+    invoiceNumber: "INV-2023-002",
+    supplierName: "Supplier B",
+    purchaseDate: "2023-10-25",
+    items: [
+      { id: "ITEM004", name: "Monitor", purchasedQuantity: 3, returnedQuantity: 0, unitPrice: 300, scaled: false },
+      { id: "ITEM005", name: "Webcam", purchasedQuantity: 7, returnedQuantity: 0, unitPrice: 50, scaled: false },
+      { id: "ITEM008", name: "USB Hub", purchasedQuantity: 4, returnedQuantity: 0, unitPrice: 30, scaled: true },
+    ],
   },
 ];

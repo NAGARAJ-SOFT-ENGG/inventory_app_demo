@@ -14,6 +14,7 @@ import {
   FileText,
   Ruler,
   Package,
+  Undo2,
 } from "lucide-react";
 import { useRBAC } from "../hooks/useRBAC";
 
@@ -205,6 +206,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 >
                   <FileText className="w-5 h-5" />
                   <span className="flex-1">Purchases</span>
+                </NavLink>
+                <NavLink
+                  to="/purchase-returns"
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-blue-100 text-blue-600"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`
+                  }
+                >
+                  <Undo2 className="w-5 h-5" />
+                  <span className="flex-1">Purchase Returns</span>
                 </NavLink>
                 <NavLink
                   to="/scales-screen"
