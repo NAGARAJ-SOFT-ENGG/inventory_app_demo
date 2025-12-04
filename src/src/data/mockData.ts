@@ -144,10 +144,16 @@ export const mockProducts: Product[] = [
 ];
 
 export const mockItems: Item[] = [
-  { id: 1, productName: 'Cement Bag', qty: 100, price: 350, batchNo: 'B001' },
-  { id: 2, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002' },
-  { id: 3, productName: 'Bricks (Red)', qty: 5000, price: 12, batchNo: 'B003' },
-  { id: 4, productName: 'Sand (River)', qty: 20, price: 1500, batchNo: 'B004' },
+  { id: 1, productName: 'Cement Bag', qty: 100, price: 350, batchNo: 'B001', expiryDate: '2026-05-20', pack: '50kg', supplierTax: '5%' },
+  { id: 2, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
+  { id: 3, productName: 'Bricks (Red)', qty: 5000, price: 12, batchNo: 'B003', pack: '1000 units', supplierTax: '12%' },
+  { id: 4, productName: 'Sand (River)', qty: 20, price: 1500, batchNo: 'B004', pack: 'Cubic Meter', supplierTax: '5%' },
+  { id: 5, productName: 'Plywood Sheet', qty: 150, price: 800, batchNo: 'B005', expiryDate: '2028-11-30', pack: '8x4 ft', supplierTax: '12%' },
+  { id: 6, productName: 'PVC Pipe', qty: 300, price: 120, batchNo: 'B006', pack: '10 ft length', supplierTax: '18%' },
+    { id: 7, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
+      { id: 8, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
+        { id: 9, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
+        { id: 10, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
 ];
 
 export const mockPrices: Price[] = [

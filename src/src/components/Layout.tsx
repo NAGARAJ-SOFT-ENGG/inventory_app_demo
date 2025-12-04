@@ -1,14 +1,32 @@
 import React, { useContext, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Menu, LogOut, User, Bell } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import { Sidebar } from "./Sidebar";
 import { ProfileDialog } from "./ProfileDialog";
 
+const routeTitles: { [key: string]: { title: string; subtitle: string } } = {
+  "/dashboard": { title: "Dashboard", subtitle: "Overview of your inventory" },
+  "/masters/items": { title: "Item Master", subtitle: "Manage your master items" },
+  "/masters/suppliers": { title: "Supplier Master", subtitle: "Manage your master suppliers" },
+  "/masters/prices": { title: "Price Master", subtitle: "Manage your pricing units" },
+  "/masters/quantities": { title: "QTY Master", subtitle: "Manage your quantity units" },
+  "/po-screen": { title: "Create Purchase Invoice", subtitle: "Generate a new purchase invoice" },
+  "/scales-screen": { title: "Create Scales Invoice", subtitle: "Generate a new scales invoice" },
+  "/purchase-returns": { title: "Purchase Returns", subtitle: "Process returns for purchase invoices" },
+  "/reports": { title: "Reports Center", subtitle: "Generate and download system reports" },
+  "/users": { title: "User Management", subtitle: "Manage system users and permissions" },
+  "/employees": { title: "Employees", subtitle: "Manage your team members" },
+  "/products": { title: "Products", subtitle: "Manage your product catalog" },
+  "/inventory": { title: "Inventory", subtitle: "Track your inventory items" },
+  "/sales": { title: "Sales", subtitle: "Create invoices and manage sales" },
+};
+
 export const Layout: React.FC = () => {
   const { user, logout } = useContext(AuthContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState<boolean>(false);
+  const location = useLocation();
 
   const handleLogout = (): void => {
     logout();
@@ -17,7 +35,7 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex">
       {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={handleLogout} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-0 min-w-0">
@@ -33,8 +51,11 @@ export const Layout: React.FC = () => {
             </button>
 
             {/* Search Bar - Optional */}
-            <div className="flex-1 max-w-2xl mx-4 hidden md:block">
-              {/* Optional: Global search can be added here */}
+            <div className="flex-1 mx-2">
+              <h2 className="text-lg font-semibold text-gray-900 hidden sm:block">
+                {routeTitles[location.pathname]?.title || "Inventory System"}
+              </h2>
+              <p className="text-sm text-gray-500 hidden sm:block">{routeTitles[location.pathname]?.subtitle}</p>
             </div>
 
             {/* Right Side - User Menu */}
@@ -58,20 +79,12 @@ export const Layout: React.FC = () => {
                   <User className="w-6 h-6 text-white" />
                 </div>
               </button>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-auto">
           <Outlet />
         </main>
       </div>

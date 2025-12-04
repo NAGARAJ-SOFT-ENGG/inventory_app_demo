@@ -4,4 +4,7 @@ export interface Item {
   qty: number;
   price: number;
   batchNo: string;
+  expiryDate?: string;
+  pack?: string;
+  supplierTax?: string;
 }

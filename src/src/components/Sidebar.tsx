@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   X,
   BarChart2,
+  LogOut,
   Database,
   ChevronDown,
   Box,
@@ -21,6 +22,7 @@ import { useRBAC } from "../hooks/useRBAC";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogout: () => void;
 }
 
 interface NavigationItem {
@@ -29,7 +31,7 @@ interface NavigationItem {
   icon: React.ElementType;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
   const location = useLocation();
   const { isAdmin } = useRBAC();
   const [isMastersOpen, setIsMastersOpen] = React.useState(false);
@@ -262,12 +264,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {/* Footer */}
           <div className="p-4 border-t border-gray-200">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Need Help?</p>
-              <p className="text-xs text-gray-500 mt-1">
-                Contact support for assistance
-              </p>
-            </div>
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center gap-3 text-left px-4 py-3 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="flex-1">Logout</span>
+            </button>
           </div>
         </div>
       </aside>
