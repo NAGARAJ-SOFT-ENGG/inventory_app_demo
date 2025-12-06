@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
 import { Save } from "lucide-react";
 
 export const PurchaseReturnsPage: React.FC = () => {
@@ -16,6 +18,11 @@ export const PurchaseReturnsPage: React.FC = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<PurchaseInvoice | null>(null);
   const [returnQuantities, setReturnQuantities] = useState<{ [itemId: string]: number }>({});
   const [stock, setStock] = useState<{ [itemId: string]: number }>({}); // Mock stock
+  const [filters, setFilters] = useState({
+    startDate: "",
+    endDate: "",
+    invoiceNo: "",
+  });
 
   useEffect(() => {
     // Initialize invoices from mock data
@@ -30,6 +37,25 @@ export const PurchaseReturnsPage: React.FC = () => {
     });
     setStock(initialStock);
   }, []);
+
+  const filteredInvoices = React.useMemo(() => {
+    return invoices.filter((invoice) => {
+      const itemDate = new Date(invoice.purchaseDate);
+      const startDate = filters.startDate ? new Date(filters.startDate) : null;
+      const endDate = filters.endDate ? new Date(filters.endDate) : null;
+
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+      }
+
+      if (startDate && itemDate < startDate) return false;
+      if (endDate && itemDate > endDate) return false;
+      if (filters.invoiceNo && !invoice.invoiceNumber.toLowerCase().includes(filters.invoiceNo.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }, [invoices, filters]);
 
   const handleInvoiceSelect = (invoiceId: string) => {
     const invoice = invoices.find((inv) => inv.id === invoiceId) || null;
@@ -117,26 +143,41 @@ export const PurchaseReturnsPage: React.FC = () => {
 
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
 
-      <div className="mb-8">
-        <label htmlFor="invoice-select" className="block text-gray-700 text-sm font-bold mb-2">
-          Select Purchase Invoice:
-        </label>
-        <Select
-          onValueChange={handleInvoiceSelect}
-          value={selectedInvoice?.id || ""}
-        >
-          <SelectTrigger id="invoice-select" className="w-full">
-            <SelectValue placeholder="-- Select an Invoice --" />
-          </SelectTrigger>
-          <SelectContent>
-            {invoices.map((invoice) => (
-              <SelectItem key={invoice.id} value={invoice.id}>
-                {invoice.invoiceNumber} - {invoice.supplierName} ({invoice.purchaseDate})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mb-6">
+          <div className="space-y-2">
+            <Label htmlFor="startDate">Start Date</Label>
+            <Input id="startDate" type="date" value={filters.startDate} onChange={e => setFilters({...filters, startDate: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="endDate">End Date</Label>
+            <Input id="endDate" type="date" value={filters.endDate} onChange={e => setFilters({...filters, endDate: e.target.value})} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="invoiceNo">Invoice Number</Label>
+            <Input id="invoiceNo" placeholder="Filter by Invoice #" value={filters.invoiceNo} onChange={e => setFilters({...filters, invoiceNo: e.target.value})} />
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <label htmlFor="invoice-select" className="block text-gray-700 text-sm font-bold mb-2">
+            Select Purchase Invoice:
+          </label>
+          <Select
+            onValueChange={handleInvoiceSelect}
+            value={selectedInvoice?.id || ""}
+          >
+            <SelectTrigger id="invoice-select" className="w-full">
+              <SelectValue placeholder="-- Select an Invoice --" />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredInvoices.map((invoice) => (
+                <SelectItem key={invoice.id} value={invoice.id}>
+                  {invoice.invoiceNumber} - {invoice.supplierName} ({invoice.purchaseDate})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
       {selectedInvoice && (
         <div className="p-4 border rounded-lg bg-gray-50">

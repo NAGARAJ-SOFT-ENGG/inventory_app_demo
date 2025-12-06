@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 import {
   Dialog,
@@ -16,10 +16,20 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue, 
-} from '../../components/ui/select'; 
+  SelectValue,
+} from '../../components/ui/select';
 import { mockPrices } from '../data/mockData';
 import { Price } from '../models/price.model';
+import { Card, CardContent } from '../../components/ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationFirst,
+  PaginationLast,
+} from '../../components/ui/pagination';
 
 export const PriceMasterPage: React.FC = () => {
   const [prices, setPrices] = useState<Price[]>(mockPrices);
@@ -29,10 +39,22 @@ export const PriceMasterPage: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState<Price | null>(null);
   const [formData, setFormData] = useState<Partial<Price>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   const filteredPrices = prices.filter((price) =>
     price.unit.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredPrices.length / itemsPerPage);
+  const paginatedPrices = filteredPrices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleAdd = () => {
     const newPrice: Price = {
@@ -70,30 +92,26 @@ export const PriceMasterPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-gray-900 mb-2">Price Master</h2>
-          <p className="text-gray-600">Manage your pricing units</p>
-        </div>
+        <Card className="p-2 w-full">
+          <CardContent className="flex items-center justify-between gap-2 p-0">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search by unit..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
         <Button onClick={() => setIsAddDialogOpen(true)} variant="gradient" size="lg">
           <Plus className="w-5 h-5 mr-2" />
-          <span>Add Price</span>
+          Add Price
         </Button>
-      </div>
-
-      {/* Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search by unit..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10"
-          />
-        </div>
       </div>
 
       {/* Prices Table */}
@@ -108,11 +126,11 @@ export const PriceMasterPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredPrices.map((price, index) => (
+              {paginatedPrices.map((price, index) => (
                 <motion.tr key={price.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} className="hover:bg-blue-50 transition-colors">
-                  <td className="px-6 py-4 text-gray-900">{price.unit}</td>
-                  <td className="px-6 py-4 text-gray-600">${price.price.toFixed(2)}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-1 text-gray-900">{price.unit}</td>
+                  <td className="px-6 py-1 text-gray-600">${price.price.toFixed(2)}</td>
+                  <td className="px-6 py-1">
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(price)} className="text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => { setSelectedPrice(price); setIsDeleteDialogOpen(true); }} className="text-red-600 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button>
@@ -123,6 +141,30 @@ export const PriceMasterPage: React.FC = () => {
             </tbody>
           </table>
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="p-0 flex justify-center items-center gap-2">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationFirst onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                </PaginationItem>
+                <PaginationItem>
+                  <span className="text-sm text-gray-600 px-4">Page {currentPage} of {totalPages}</span>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLast onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       {/* Add/Edit Dialog */}

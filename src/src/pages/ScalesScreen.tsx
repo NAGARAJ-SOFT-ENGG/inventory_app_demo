@@ -244,6 +244,13 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import ItemsTable from "../../components/ui/itemsTable";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
 import { Textarea } from "../../components/ui/textarea";
 import { generatePurchaseInvoicePDF } from "../utils/purchaseInvoiceGenerator";
 
@@ -255,6 +262,8 @@ const ScalesScreen = () => {
   const [items, setItems] = useState([
     // { id: 1, name: "POPCORN T-SHIRT", description: "", hsn: "", qty: 1, unit: "PCS", price: 350, discount: 0, tax: 0, amount: 350 }
   ]);
+
+  const [isSaveConfirmationDialogOpen, setIsSaveConfirmationDialogOpen] = useState(false);
 
   const [view, setView] = useState<'desktop' | 'mobile'>('desktop');
 
@@ -400,21 +409,14 @@ const ScalesScreen = () => {
     generatePurchaseInvoicePDF(items, totals, globalState, selectedSupplier, 'scales');
   };
 
-  return (
-    <div className="min-h-screen  font-sans text-gray-800 pb-6">
-      
-      {/* Header */}
-      <div className="flex items-center justify-between text-gray-900 mb-2 sticky top-0 z-20 print-hide">       
-         <h1 className="text-xl font-semibold text-gray-800">Create Scales Invoice</h1>
-        
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={handlePrint}>
-            <Printer className="h-5 w-5" />
-          </Button>
-          <Button variant="gradient" className="py-2" >Save Scales Entry</Button>
-        </div>
-      </div>
+  const handleSave = () => {
+    // Logic to save the scales entry would go here.
+    setIsSaveConfirmationDialogOpen(true);
+  };
 
+  return (
+    <>
+      
       <div id="printable-invoice" className="max-w-[1600px] mx-auto p-0 space-y-4">
         
         {/* --- MAIN FORM CARD --- */}
@@ -462,7 +464,7 @@ const ScalesScreen = () => {
                 </div>
                 <div className="space-y-2">
                    <Label>Payment Terms</Label>
-                    <Input placeholder="e.g., 30 days" />
+                    <Input placeholder="" />
                 </div>
                 <div className="space-y-2">
                    <Label>Due Date</Label>
@@ -473,37 +475,6 @@ const ScalesScreen = () => {
                       className="bg-gray-100" 
                     />
                 </div>
-            </div>
-          </div>
-
-          {/* Vehicle & Transport Details */}
-          <div className="p-4 border-b border-gray-200 space-y-4">
-            <h3 className="text-sm font-semibold text-gray-700">Vehicle & Transport Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Vehicle Number</Label>
-                <Input
-                  value={globalState.vehicleNumber}
-                  onChange={(e) => setGlobalState({ ...globalState, vehicleNumber: e.target.value })}
-                  placeholder="e.g., KA01AB1234"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Driver Name</Label>
-                <Input
-                  value={globalState.driverName}
-                  onChange={(e) => setGlobalState({ ...globalState, driverName: e.target.value })}
-                  placeholder="e.g., John Doe"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Driver Mobile Number</Label>
-                <Input
-                  value={globalState.driverMobileNumber}
-                  onChange={(e) => setGlobalState({ ...globalState, driverMobileNumber: e.target.value })}
-                  placeholder="e.g., +919876543210"
-                />
-              </div>
             </div>
           </div>
 
@@ -518,26 +489,8 @@ const ScalesScreen = () => {
           </div>
 
           </div>
-
-          {/* --- BOTTOM SECTION --- */}
           <div className="flex flex-col lg:flex-row border-t border-gray-200 print-hide">
-            
-            {/* Left: Notes & Terms */}
-            <div className="w-full lg:w-1/2 p-4 space-y-4 border-r border-gray-200 bg-white">
-              <div className="space-y-2">
-                <Label htmlFor="remarks" className="text-gray-700 font-semibold">Remarks / Notes</Label>
-                <Textarea
-                  id="remarks"
-                  placeholder="Enter any remarks for the invoice..."
-                  value={globalState.remarks}
-                  onChange={(e) => setGlobalState({ ...globalState, remarks: e.target.value })}
-                  className="min-h-[80px]"
-                />
-              </div>
-            </div>
-
-            {/* Right: Calculations */}
-            <div className="w-full lg:w-1/2 p-2 space-y-3 bg-white">
+            <div className="w-full p-2 space-y-3 bg-white">
                
                {/* Discount */}
                <div className="flex justify-between items-center text-sm px-2">
@@ -545,7 +498,7 @@ const ScalesScreen = () => {
                  <div className="flex items-center gap-2">
                    <Input
                      type="number"
-                     placeholder="0"
+                    //  placeholder="0"
                      value={globalState.discountValue || ''}
                      onChange={(e) => setGlobalState({ ...globalState, discountValue: parseFloat(e.target.value) || 0 })}
                      className="w-24 h-8 text-right"
@@ -602,7 +555,7 @@ const ScalesScreen = () => {
                           <Input
                             type="number"
                             placeholder="Amount"
-                            className="bg-white w-full"
+                            className="bg-gray-100 w-full"
                             value={payment.amount || ""}
                             onChange={(e) => {
                               const newPayments = [...globalState.payments];
@@ -651,10 +604,74 @@ const ScalesScreen = () => {
                      <span className="text-green-600 font-bold text-lg">₹ {totals.balanceDue > 0 ? (totals.balanceDue || 0).toFixed(2) : '0.00'}</span>
                   </div>
                </div>
+                         {/* Vehicle & Transport Details */}
+          <div className="p-4 border-b border-gray-200 space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700">Vehicle & Transport Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label>Vehicle Number</Label>
+                <Input
+                  value={globalState.vehicleNumber}
+                  onChange={(e) => setGlobalState({ ...globalState, vehicleNumber: e.target.value })}
+                  // placeholder="e.g., KA01AB1234"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Driver Name</Label>
+                <Input
+                  value={globalState.driverName}
+                  onChange={(e) => setGlobalState({ ...globalState, driverName: e.target.value })}
+                  // placeholder="e.g., John Doe"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Driver Mobile Number</Label>
+                <Input
+                  value={globalState.driverMobileNumber}
+                  onChange={(e) => setGlobalState({ ...globalState, driverMobileNumber: e.target.value })}
+                  // placeholder="e.g., +919876543210"
+                />
+              </div>
             </div>
           </div>
+            </div>
+                      <div className="w-full p-4 border-t border-gray-200 bg-white flex flex-row justify-end print-hide">
+            <Button variant="gradient" className="py-2" onClick={handleSave}>
+              Save Scales Entry
+            </Button>
+          </div>
+          </div>
         </div>
-    </div>
+  
+      {/* Save Confirmation Dialog */}
+      <Dialog open={isSaveConfirmationDialogOpen} onOpenChange={setIsSaveConfirmationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scales Entry Saved</DialogTitle>
+          </DialogHeader>
+          <div className="p-6">
+          <p>The scales entry has been saved successfully. Would you like to print the receipt now?</p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsSaveConfirmationDialogOpen(false)}
+            >
+              No, Thanks
+            </Button>
+            <Button
+              variant="gradient"
+              onClick={() => {
+                handlePrint();
+                setIsSaveConfirmationDialogOpen(false);
+              }}
+            >
+              Yes, Print Receipt
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
