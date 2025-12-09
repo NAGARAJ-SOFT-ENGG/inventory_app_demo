@@ -160,8 +160,14 @@ export const mockPrices: Price[] = [
   { id: 1, unit: 'ton', price: 55000 },
   { id: 2, unit: 'kg', price: 55 },
   { id: 3, unit: 'bags', price: 350 },
-  // { id: 4, unit: 'piece', price: 12 },
-  // { id: 5, unit: 'cubic meter', price: 1500 },
+  { id: 4, unit: 'piece', price: 12 },
+  { id: 5, unit: 'cubic meter', price: 1500 },
+  { id: 6, unit: 'liter', price: 40 },
+  { id: 7, unit: 'gallon', price: 150 },
+  { id: 8, unit: 'sq ft', price: 200 },
+  { id: 9, unit: 'sq meter', price: 2150 },
+  { id: 10, unit: 'running ft', price: 80 },
+  { id: 11, unit: 'running meter', price: 260 }
 ];
 
 export const mockQuantities: Quantity[] = [
@@ -169,8 +175,14 @@ export const mockQuantities: Quantity[] = [
   { id: 2, unit: 'Kg', value: 1 },
   { id: 3, unit: '25 bag', value: 25 },
   { id: 4, unit: '50 bag', value: 50 },
-  // { id: 5, unit: 'Piece', value: 1 },
-  // { id: 6, unit: 'Cubic Meter', value: 1 },
+  { id: 5, unit: 'Piece', value: 1 },
+  { id: 6, unit: 'Cubic Meter', value: 1 },
+  { id: 7, unit: 'Liter', value: 1 },
+  { id: 8, unit: 'Gallon', value: 3.78541 },
+  { id: 9, 'unit': 'Sq Ft', value: 1 },
+  { id: 10, 'unit': 'Sq Meter', value: 10.764 },
+  { id: 11, 'unit': 'Running Ft', value: 1 },
+  { id: 12, 'unit': 'Running Meter', value: 3.281 }
 ];
 
 export const mockScalesItems: ScalesItem[] = [

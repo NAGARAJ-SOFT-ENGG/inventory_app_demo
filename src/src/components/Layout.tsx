@@ -33,11 +33,11 @@ export const Layout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex">
+    <div className="h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onLogout={handleLogout} />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Now with its own scroll context */}
       <div className="flex-1 flex flex-col lg:ml-0 min-w-0">
         {/* Top Header */}
         <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-30 shadow-sm">
@@ -84,7 +84,7 @@ export const Layout: React.FC = () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>
