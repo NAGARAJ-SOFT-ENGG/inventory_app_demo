@@ -93,6 +93,7 @@ export const SupplierMasterPage: React.FC = () => {
   const handleEditClick = (supplier: Supplier) => {
     setSelectedSupplier(supplier);
     setFormData(supplier);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelEdit = () => {

@@ -83,6 +83,7 @@ export const PriceMasterPage: React.FC = () => {
   const handleEditClick = (price: Price) => {
     setSelectedPrice(price);
     setFormData(price);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
@@ -223,7 +224,7 @@ export const PriceMasterPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-1 text-gray-900">{price.unit}</td>
-                  <td className="px-6 py-1 text-gray-600">${price.price.toFixed(2)}</td>
+                  <td className="px-6 py-1 text-gray-600">₹{price.price.toFixed(2)}</td>
                 </motion.tr>
               ))}
             </tbody>

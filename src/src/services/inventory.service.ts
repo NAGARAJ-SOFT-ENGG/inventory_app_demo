@@ -1,5 +1,5 @@
 import { InventoryItem, Purchase, StockMovement } from "../models/inventory.model";
-import { mockInventory, mockPurchases, mockStockMovements } from "../data/mockData";
+// import { mockInventory, mockPurchases, mockStockMovements } from "../data/mockData";
 
 export class InventoryService {
   private static readonly API_BASE = "/api/inventory";
@@ -12,7 +12,7 @@ export class InventoryService {
     // Mock response using mock data
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(mockInventory);
+        // resolve(mockInventory);
       }, 500);
     });
   }
@@ -62,8 +62,8 @@ export class InventoryService {
     // TODO: Replace with actual API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        const item = mockInventory.find((i) => i.id === id);
-        resolve({ ...item!, ...updates });
+        // const item = mockInventory.find((i) => i.id === id);
+        // resolve({ ...item!, ...updates });
       }, 500);
     });
   }

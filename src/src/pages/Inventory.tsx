@@ -190,7 +190,7 @@ export const Inventory: React.FC = () => {
                     </p>
                   </td>
                   <td className="px-6 py-4 text-gray-900">
-                    ${item.price.toFixed(2)}
+                    ₹{item.price.toFixed(2)}
                   </td>
                   <td className="px-6 py-4">
                     <span

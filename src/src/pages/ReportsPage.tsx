@@ -29,10 +29,10 @@ export const ReportsPage: React.FC = () => {
     // 1. Select Data Source
     if (reportType === 'scales') {
       data = mockScalesItems;
-      headers = ["Date", "Invoice #", "Supplier", "Product", "Qty", "Price", "Vehicle No."];
+      headers = ["Date", "Invoice #", "Supplier", "Item Name", "Qty", "Price", "Amount", "Vehicle No."];
     } else if (reportType === 'purchase') {
       data = mockPOItems;
-      headers = ["Date", "Invoice #", "Supplier", "Product", "Qty", "Vehicle No.", "Driver"];
+      headers = ["Date", "Invoice #", "Supplier", "Item Name", "Qty", "Price", "Amount", "Vehicle No."];
     } else if (reportType === 'editHistory') {
       // Mock edit history data for demonstration
       data = mockEditHistory;
@@ -41,7 +41,7 @@ export const ReportsPage: React.FC = () => {
 
     // 2. Apply Filters
     let filteredData = data.filter(item => {
-      const itemDate = new Date(item.date);
+      const itemDate = new Date(item.globalState?.date || item.date);
       const startDate = filters.startDate ? new Date(filters.startDate) : null; 
       const endDate = filters.endDate ? new Date(filters.endDate) : null; 
 
@@ -52,7 +52,7 @@ export const ReportsPage: React.FC = () => {
 
       if (startDate && itemDate < startDate) return false;
       if (endDate && itemDate > endDate) return false;
-      if (filters.invoiceNo && item.invoiceNo && !item.invoiceNo.toLowerCase().includes(filters.invoiceNo.toLowerCase())) return false;
+      if (filters.invoiceNo && (item.globalState?.invoiceNo || item.invoiceNo) && !(item.globalState?.invoiceNo || item.invoiceNo).toLowerCase().includes(filters.invoiceNo.toLowerCase())) return false;
       
       return true;
     });
@@ -67,12 +67,25 @@ export const ReportsPage: React.FC = () => {
     }
 
     // 4. Format data for display and export
-    const formattedData = filteredData.map(item => {
-        if (reportType === 'scales') return [item.date, item.id, item.supplierName, item.productName, item.qty, `$${item.price.toFixed(2)}`, item.vehicleNumber];
-        if (reportType === 'purchase') return [item.date, item.id, item.supplierName, item.productName, item.qty, item.vehicleNumber, item.driverName];
-        if (reportType === 'editHistory') return [item.date, item.invoiceNo, item.field, item.oldValue, item.newValue, item.user];
-        return Object.values(item);
-    });
+    let formattedData: any[][] = [];
+    if (reportType === 'scales' || reportType === 'purchase') {
+      filteredData.forEach(invoice => {
+        invoice.items.forEach((lineItem: any) => {
+          formattedData.push([
+            invoice.globalState.date,
+            invoice.globalState.invoiceNo,
+            invoice.supplier.name,
+            lineItem.name,
+            lineItem.qty,
+            `₹${lineItem.price.toFixed(2)}`,
+            `₹${lineItem.amount.toFixed(2)}`,
+            invoice.vehicleNumber,
+          ]);
+        });
+      });
+    } else if (reportType === 'editHistory') {
+      formattedData = filteredData.map(item => [item.date, item.invoiceNo, item.field, item.oldValue, item.newValue, item.user]);
+    }
 
     setReportHeaders(headers);
     setReportData(formattedData);

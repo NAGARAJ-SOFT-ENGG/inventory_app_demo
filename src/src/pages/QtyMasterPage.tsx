@@ -83,6 +83,7 @@ export const QtyMasterPage: React.FC = () => {
   const handleEditClick = (qty: Quantity) => {
     setSelectedQuantity(qty);
     setFormData(qty);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {

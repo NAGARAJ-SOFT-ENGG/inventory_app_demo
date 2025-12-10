@@ -1,147 +1,8 @@
-import { Product } from "../models/product.model";
 import { Employee } from "../models/employee.model";
-import { Order } from "../models/order.model";
 import { Supplier } from "../models/supplier.model";
-import { ScalesItem } from "../models/scales.model";
-import { InventoryItem, Purchase, StockMovement } from "../models/inventory.model";
 import { Item } from "../models/item.model";
 import { Price } from "../models/price.model";
 import { Quantity } from "../models/quantity.model";
-
-export interface PurchaseItem {
-  id: string;
-  name: string;
-  purchasedQuantity: number;
-  returnedQuantity: number; // To track how much has been returned
-  unitPrice: number;
-  scaled: boolean; // True if item has gone to scales, cannot be returned
-}
-export interface PurchaseInvoice {
-  id: string;
-  invoiceNumber: string;
-  supplierName: string;
-  purchaseDate: string;
-  items: PurchaseItem[];
-}
-
-export const mockProducts: Product[] = [
-  {
-    id: "prod-001",
-    name: "Laptop Computer",
-    sku: "LPT-2024-001",
-    category: "Electronics",
-    description: "High-performance laptop with 16GB RAM and 512GB SSD",
-    price: 1299.99,
-    oldPrice: 1499.99,
-    coupon: "LAPTOP10",
-    visibility: "published",
-    sizes: [],
-    stock: 45,
-    supplier: "Tech Supplies Inc.",
-    createdAt: "2025-11-10T10:30:00Z",
-    updatedAt: "2025-11-15T10:30:00Z",
-  },
-  {
-    id: "prod-002",
-    name: "Office Chair",
-    sku: "CHR-2024-002",
-    category: "Furniture",
-    description: "Ergonomic office chair with lumbar support",
-    price: 249.99,
-    visibility: "published",
-    sizes: [],
-    stock: 8,
-    supplier: "Furniture World",
-    createdAt: "2025-11-12T14:20:00Z",
-    updatedAt: "2025-11-15T14:20:00Z",
-  },
-  {
-    id: "prod-003",
-    name: "Wireless Mouse",
-    sku: "MSE-2024-003",
-    category: "Accessories",
-    description: "Bluetooth wireless mouse with ergonomic design",
-    price: 29.99,
-    visibility: "published",
-    sizes: [],
-    stock: 120,
-    supplier: "Tech Supplies Inc.",
-    createdAt: "2025-11-14T09:15:00Z",
-    updatedAt: "2025-11-15T09:15:00Z",
-  },
-  {
-    id: "prod-004",
-    name: "4K Monitor",
-    sku: "MON-2024-004",
-    category: "Electronics",
-    description: "27-inch 4K UHD monitor with HDR support",
-    price: 449.99,
-    oldPrice: 549.99,
-    visibility: "published",
-    sizes: [],
-    stock: 32,
-    supplier: "Display Tech Ltd.",
-    createdAt: "2025-11-08T11:00:00Z",
-    updatedAt: "2025-11-15T11:00:00Z",
-  },
-  {
-    id: "prod-005",
-    name: "Mechanical Keyboard",
-    sku: "KBD-2024-005",
-    category: "Accessories",
-    description: "RGB mechanical keyboard with Cherry MX switches",
-    price: 129.99,
-    visibility: "published",
-    sizes: [],
-    stock: 67,
-    supplier: "Tech Supplies Inc.",
-    createdAt: "2025-11-09T13:45:00Z",
-    updatedAt: "2025-11-15T13:45:00Z",
-  },
-  {
-    id: "prod-006",
-    name: "Standing Desk",
-    sku: "DSK-2024-006",
-    category: "Furniture",
-    description: "Electric height-adjustable standing desk",
-    price: 599.99,
-    oldPrice: 699.99,
-    visibility: "published",
-    sizes: [],
-    stock: 5,
-    supplier: "Furniture World",
-    createdAt: "2025-11-07T15:20:00Z",
-    updatedAt: "2025-11-15T15:20:00Z",
-  },
-  {
-    id: "prod-007",
-    name: "Webcam HD",
-    sku: "WBC-2024-007",
-    category: "Electronics",
-    description: "1080p HD webcam with noise-canceling mic",
-    price: 79.99,
-    visibility: "published",
-    sizes: [],
-    stock: 89,
-    supplier: "Tech Supplies Inc.",
-    createdAt: "2025-11-06T09:30:00Z",
-    updatedAt: "2025-11-15T09:30:00Z",
-  },
-  {
-    id: "prod-008",
-    name: "Desk Lamp LED",
-    sku: "LMP-2024-008",
-    category: "Accessories",
-    description: "Adjustable LED desk lamp with touch control",
-    price: 39.99,
-    visibility: "published",
-    sizes: [],
-    stock: 156,
-    supplier: "Furniture World",
-    createdAt: "2025-11-05T10:15:00Z",
-    updatedAt: "2025-11-15T10:15:00Z",
-  },
-];
 
 export const mockItems: Item[] = [
   { id: 1, productName: 'Cement Bag', qty: 100, price: 350, batchNo: 'B001', expiryDate: '2026-05-20', pack: '50kg', supplierTax: '5%' },
@@ -150,10 +11,6 @@ export const mockItems: Item[] = [
   { id: 4, productName: 'Sand (River)', qty: 20, price: 1500, batchNo: 'B004', pack: 'Cubic Meter', supplierTax: '5%' },
   { id: 5, productName: 'Plywood Sheet', qty: 150, price: 800, batchNo: 'B005', expiryDate: '2028-11-30', pack: '8x4 ft', supplierTax: '12%' },
   { id: 6, productName: 'PVC Pipe', qty: 300, price: 120, batchNo: 'B006', pack: '10 ft length', supplierTax: '18%' },
-    { id: 7, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
-      { id: 8, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
-        { id: 9, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
-        { id: 10, productName: 'Steel Rod (TMT)', qty: 500, price: 55000, batchNo: 'B002', expiryDate: '2027-01-15', pack: '1 Ton', supplierTax: '18%' },
 ];
 
 export const mockPrices: Price[] = [
@@ -185,117 +42,127 @@ export const mockQuantities: Quantity[] = [
   { id: 12, 'unit': 'Running Meter', value: 3.281 }
 ];
 
-export const mockScalesItems: ScalesItem[] = [
+export const mockSuppliers: Supplier[] = [
+  { id: "sup-1", supplierCode: "SUP0001", name: "Construction Supplies Co.", email: "contact@constructionsupplies.com", phone: "123-456-7890", address: "123 Industrial Rd, Metropolis, USA", city: "Metropolis", country: "USA", productsSupplied: ["Cement", "Steel"], rating: 4.5, totalOrders: 150, status: "active", createdAt: "2024-01-01T10:00:00Z" },
+  { id: "sup-2", supplierCode: "SUP0002", name: "Global Building Materials", email: "sales@globalbuild.com", phone: "987-654-3210", address: "456 Commerce Blvd, Gotham, USA", city: "Gotham", country: "USA", productsSupplied: ["Bricks", "Sand"], rating: 4.0, totalOrders: 200, status: "active", createdAt: "2023-11-15T11:30:00Z" },
+  { id: "sup-3", supplierCode: "SUP0003", name: "Eco-Friendly Wood Inc.", email: "info@ecowood.com", phone: "555-111-2222", address: "789 Forest Lane, Star City, USA", city: "Star City", country: "USA", productsSupplied: ["Timber", "Plywood"], rating: 4.8, totalOrders: 80, status: "active", createdAt: "2024-03-20T09:00:00Z" },
+  { id: "sup-4", supplierCode: "SUP0004", name: "Metal Fabricators Ltd.", email: "orders@metalfab.com", phone: "222-333-4444", address: "101 Steel Way, Central City, USA", city: "Central City", country: "USA", productsSupplied: ["Steel Beams", "Rebar"], rating: 4.2, totalOrders: 120, status: "active", createdAt: "2024-02-10T14:00:00Z" },
+  { id: "sup-5", supplierCode: "SUP0005", name: "Walk-in Customer", email: "na@walkin.com", phone: "N/A", address: "N/A", city: "N/A", country: "N/A", productsSupplied: [], rating: 5, totalOrders: 1000, status: "active", createdAt: "2024-01-01T00:00:00Z" },
+];
+
+export const mockScalesItems: any[] = [
   {
-    id: "scale-1",
-    supplierName: "Supplier A",
-    productName: "Cement",
-    qty: 50,
-    price: 350,
-    date: "2025-10-26",
-    time: "10:30",
-    vehicleNumber: "TN01AB1234",
-    transportName: "Fast Movers",
-    driverName: "John Doe",
-    mobileNumber: "9876543210",
+    globalState: { invoiceNo: 'SCALE-001', date: '2025-11-10', dueDate: '2025-12-10', amountPaid: 0 },
+    supplier: mockSuppliers[0],
+    items: [
+      { id: 1, name: mockItems[0].productName, qty: 50, price: mockItems[0].price, discount: 0, tax: 5, amount: 18375 },
+      { id: 2, name: mockItems[3].productName, qty: 10, price: mockItems[3].price, discount: 0, tax: 5, amount: 15750 },
+    ],
+    totals: { subtotal: 32500, totalDiscount: 0, taxableAmount: 32500, totalTax: 1625, total: 34125, roundOffValue: 0, balanceDue: 34125 },
+    vehicleNumber: "TN01AB1234", transportName: "Fast Movers", driverName: "John Doe", mobileNumber: "9876543210",
   },
   {
-    id: "scale-2",
-    supplierName: "Supplier B",
-    productName: "Steel",
-    qty: 1000,
-    price: 55000,
-    date: "2025-10-27",
-    time: "14:00",
-    vehicleNumber: "KA02CD5678",
-    transportName: "Quick Logistics",
-    driverName: "Jane Smith",
-    mobileNumber: "8765432109",
+    globalState: { invoiceNo: 'SCALE-002', date: '2025-11-11', dueDate: '2025-12-11', amountPaid: 100000 },
+    supplier: mockSuppliers[1],
+    items: [
+      { id: 1, name: mockItems[1].productName, qty: 2, price: mockItems[1].price, discount: 1000, tax: 18, amount: 128620 },
+      { id: 2, name: mockItems[2].productName, qty: 5000, price: mockItems[2].price, discount: 0, tax: 12, amount: 67200 },
+    ],
+    totals: { subtotal: 170000, totalDiscount: 1000, taxableAmount: 169000, totalTax: 26820, total: 195820, roundOffValue: 0, balanceDue: 95820 },
+    vehicleNumber: "KA02CD5678", transportName: "Quick Logistics", driverName: "Jane Smith", mobileNumber: "8765432109",
   },
   {
-    id: "scale-3",
-    supplierName: "Supplier C",
-    productName: "Bricks",
-    qty: 5000,
-    price: 12,
-    date: "2025-10-28",
-    time: "09:15",
-    vehicleNumber: "AP03EF9012",
-    transportName: "BuildWell Transports",
-    driverName: "Peter Jones",
-    mobileNumber: "7654321098",
+    globalState: { invoiceNo: 'SCALE-003', date: '2025-11-12', dueDate: '2025-12-12', amountPaid: 0 },
+    supplier: mockSuppliers[2],
+    items: [
+      { id: 1, name: mockItems[4].productName, qty: 100, price: mockItems[4].price, discount: 4000, tax: 12, amount: 85120 },
+      { id: 2, name: 'Timber', qty: 5, price: 2500, discount: 0, tax: 12, amount: 14000 }, // Assuming Timber is a custom item
+    ],
+    totals: { subtotal: 92500, totalDiscount: 4000, taxableAmount: 88500, totalTax: 10620, total: 99120, roundOffValue: 0, balanceDue: 99120 },
+    vehicleNumber: "AP03EF9012", transportName: "BuildWell Transports", driverName: "Peter Jones", mobileNumber: "7654321098",
   },
   {
-    id: "scale-4",
-    supplierName: "Supplier A",
-    productName: "Sand",
-    qty: 20,
-    price: 1500,
-    date: "2025-10-29",
-    time: "16:45",
-    vehicleNumber: "MH04GH3456",
-    transportName: "Riverbed Supplies",
-    driverName: "Sam Wilson",
-    mobileNumber: "6543210987",
-  },
-  {
-    id: "scale-5",
-    supplierName: "Supplier B",
-    productName: "Gravel",
-    qty: 15,
-    price: 1200,
-    date: "2025-11-01",
-    time: "11:00",
-    vehicleNumber: "KL05MN7890",
-    transportName: "Rock Solid Transport",
-    driverName: "Alex Ray",
-    mobileNumber: "9988776655",
+    globalState: { invoiceNo: 'SCALE-004', date: '2025-11-13', dueDate: '2025-12-13', amountPaid: 5000 },
+    supplier: mockSuppliers[4], // Walk-in Customer
+    items: [
+      { id: 1, name: mockItems[5].productName, qty: 20, price: mockItems[5].price, discount: 0, tax: 18, amount: 2832 },
+    ],
+    totals: { subtotal: 2400, totalDiscount: 0, taxableAmount: 2400, totalTax: 432, total: 2832, roundOffValue: 0, balanceDue: -2168 },
+    vehicleNumber: "MH04GH3456", transportName: "Self", driverName: "Sam Wilson", mobileNumber: "6543210987",
   },
 ];
 
-export const mockPOItems = [
+export const mockPOItems: any[] = [
   {
-    id: "po-001",
-    supplierName: "Supplier A",
-    productName: "Cement Bag",
-    qty: 100,
-    date: "2025-11-20",
-    time: "10:30",
-    vehicleNumber: "TS07AB1234",
-    transportName: "Speedy Logistics",
-    driverName: "John Doe",
-    mobileNumber: "9876543210",
+    globalState: { invoiceNo: 'PO-001', date: '2025-11-20', dueDate: '2025-12-20', amountPaid: 0 },
+    supplier: mockSuppliers[0],
+    items: [
+      { id: 1, name: mockItems[0].productName, qty: 100, price: mockItems[0].price, discount: '2%', tax: '5%', amount: 35910 },
+      { id: 2, name: 'Gravel', qty: 15, price: 1200, discount: 0, tax: '5%', amount: 18900 }, // Custom item
+      { id: 3, name: mockItems[5].productName, qty: 50, price: mockItems[5].price, discount: 0, tax: '18%', amount: 7080 },
+    ],
+    totals: { subtotal: 59000, totalDiscount: 700, taxableAmount: 58300, totalTax: 4290, total: 62590, roundOffValue: 0, balanceDue: 62590 },
+    vehicleNumber: "TS07AB1234", transportName: "Speedy Logistics", driverName: "John Doe", mobileNumber: "9876543210",
   },
   {
-    id: "po-002",
-    supplierName: "Supplier B",
-    productName: "Steel Rod (TMT)",
-    qty: 50,
-    date: "2025-11-21",
-    time: "14:00",
-    vehicleNumber: "AP09CD5678",
-    transportName: "Reliable Transport",
-    driverName: "Jane Smith",
-    mobileNumber: "8765432109",
+    globalState: { invoiceNo: 'PO-002', date: '2025-11-21', dueDate: '2025-12-21', amountPaid: 50000 },
+    supplier: mockSuppliers[3],
+    items: [
+      { id: 1, name: mockItems[1].productName, qty: 1.5, price: mockItems[1].price, discount: 1500, tax: '18%', amount: 95580 },
+      { id: 2, name: 'Steel Beams', qty: 10, price: 4000, discount: 0, tax: '18%', amount: 47200 }, // Custom item
+    ],
+    totals: { subtotal: 122500, totalDiscount: 1500, taxableAmount: 121000, totalTax: 21780, total: 142780, roundOffValue: 0, balanceDue: 92780 },
+    vehicleNumber: "AP09CD5678", transportName: "Reliable Transport", driverName: "Jane Smith", mobileNumber: "8765432109",
   },
   {
-    id: "po-003",
-    supplierName: "Supplier C",
-    productName: "Red Bricks",
-    qty: 2500,
-    date: "2025-11-22",
-    time: "09:45",
-    vehicleNumber: "MH12PQ1234",
-    transportName: "BuildFast Supplies",
-    driverName: "Chris Green",
-    mobileNumber: "7766554433",
+    globalState: { invoiceNo: 'PO-003', date: '2025-11-22', dueDate: '2025-12-22', amountPaid: 0 },
+    supplier: mockSuppliers[1],
+    items: [
+      { id: 1, name: mockItems[2].productName, qty: 3000, price: mockItems[2].price, discount: 0, tax: '12%', amount: 40320 },
+      { id: 2, name: mockItems[3].productName, qty: 20, price: mockItems[3].price, discount: '5%', tax: '5%', amount: 30896.25 },
+    ],
+    totals: { subtotal: 67000, totalDiscount: 1550, taxableAmount: 65450, totalTax: 6116.25, total: 71566.25, roundOffValue: 0.25, balanceDue: 71566 },
+    vehicleNumber: "MH12PQ1234", transportName: "BuildFast Supplies", driverName: "Chris Green", mobileNumber: "7766554433",
   },
+  {
+    globalState: { invoiceNo: 'PO-004', date: '2025-11-24', dueDate: '2025-12-24', amountPaid: 100000 },
+    supplier: mockSuppliers[2],
+    items: [
+      { id: 1, name: mockItems[4].productName, qty: 200, price: 850, discount: '10%', tax: '12%', amount: 171360 },
+      { id: 2, name: 'Timber', qty: 10, price: 2600, discount: 0, tax: '12%', amount: 29120 }, // Custom item
+    ],
+    totals: { subtotal: 196000, totalDiscount: 17000, taxableAmount: 179000, totalTax: 21480, total: 200480, roundOffValue: 0, balanceDue: 100480 },
+    vehicleNumber: "KA05YZ9012", transportName: "Green Transports", driverName: "Michael Brown", mobileNumber: "5544332211",
+  },
+];
+
+export interface PurchaseItem {
+  id: string;
+  name: string;
+  purchasedQuantity: number;
+  returnedQuantity: number;
+  unitPrice: number;
+  scaled: boolean;
+}
+
+export interface PurchaseInvoice {
+  id: string;
+  invoiceNumber: string;
+  supplierName: string;
+  purchaseDate: string;
+  items: PurchaseItem[];
+}
+
+export const mockPurchaseInvoices: PurchaseInvoice[] = [
+  { id: "PI001", invoiceNumber: "INV-2025-001", supplierName: "Construction Supplies Co.", purchaseDate: "2025-10-20", items: [ { id: "ITEM001", name: "Cement Bag", purchasedQuantity: 100, returnedQuantity: 10, unitPrice: 350, scaled: false }, { id: "ITEM002", name: "Gravel", purchasedQuantity: 15, returnedQuantity: 0, unitPrice: 1200, scaled: true }, { id: "ITEM003", name: "PVC Pipe", purchasedQuantity: 50, returnedQuantity: 5, unitPrice: 120, scaled: false }, ], },
+  { id: "PI002", invoiceNumber: "INV-2025-002", supplierName: "Metal Fabricators Ltd.", purchaseDate: "2025-10-25", items: [ { id: "ITEM004", name: "Steel Rod (TMT)", purchasedQuantity: 2, returnedQuantity: 0, unitPrice: 55000, scaled: false }, { id: "ITEM005", name: "Steel Beams", purchasedQuantity: 10, returnedQuantity: 0, unitPrice: 4000, scaled: false }, ], },
+  { id: "PI003", invoiceNumber: "INV-2025-003", supplierName: "Global Building Materials", purchaseDate: "2025-11-01", items: [ { id: "ITEM006", name: "Red Bricks", purchasedQuantity: 3000, returnedQuantity: 100, unitPrice: 12, scaled: false }, { id: "ITEM007", name: "River Sand", purchasedQuantity: 20, returnedQuantity: 0, unitPrice: 1550, scaled: true }, ], },
 ];
 
 export const mockEditHistory = [
   {
     id: "edit-1",
-    invoiceNo: "scale-1",
+    invoiceNo: "SCALE-001",
     date: "2025-10-27",
     field: "Price",
     oldValue: "340",
@@ -305,7 +172,7 @@ export const mockEditHistory = [
   },
   {
     id: "edit-2",
-    invoiceNo: "po-002",
+    invoiceNo: "PO-002",
     date: "2025-11-21",
     field: "Qty",
     oldValue: "45",
@@ -314,7 +181,6 @@ export const mockEditHistory = [
     type: "purchase"
   },
 ];
-
 
 export const mockEmployees: Employee[] = [
   {
@@ -388,315 +254,5 @@ export const mockEmployees: Employee[] = [
     joiningDate: "2023-09-01T00:00:00Z",
     status: "active",
     address: "987 Cedar Ln, Staten Island, NY 10301",
-  },
-];
-
-export const mockOrders: Order[] = [
-  {
-    id: "ord-001",
-    orderNumber: "ORD-2025-001",
-    customerId: "cust-001",
-    customerName: "ABC Corporation",
-    items: [
-      {
-        productId: "prod-001",
-        productName: "Laptop Computer",
-        quantity: 5,
-        price: 1299.99,
-        total: 6499.95,
-      },
-    ],
-    totalAmount: 6499.95,
-    status: "delivered",
-    paymentStatus: "paid",
-    orderDate: "2025-11-01T10:00:00Z",
-    deliveryDate: "2025-11-05T15:30:00Z",
-    shippingAddress: "100 Business Park, Manhattan, NY 10001",
-  },
-  {
-    id: "ord-002",
-    orderNumber: "ORD-2025-002",
-    customerId: "cust-002",
-    customerName: "XYZ Enterprises",
-    items: [
-      {
-        productId: "prod-003",
-        productName: "Wireless Mouse",
-        quantity: 25,
-        price: 29.99,
-        total: 749.75,
-      },
-    ],
-    totalAmount: 749.75,
-    status: "processing",
-    paymentStatus: "paid",
-    orderDate: "2025-11-10T14:20:00Z",
-    shippingAddress: "200 Commerce St, Brooklyn, NY 11201",
-  },
-  {
-    id: "ord-003",
-    orderNumber: "ORD-2025-003",
-    customerId: "cust-003",
-    customerName: "Tech Solutions Ltd",
-    items: [
-      {
-        productId: "prod-004",
-        productName: "4K Monitor",
-        quantity: 10,
-        price: 449.99,
-        total: 4499.90,
-      },
-    ],
-    totalAmount: 4499.90,
-    status: "shipped",
-    paymentStatus: "paid",
-    orderDate: "2025-11-12T09:15:00Z",
-    shippingAddress: "300 Tech Plaza, Queens, NY 11354",
-  },
-  {
-    id: "ord-004",
-    orderNumber: "ORD-2025-004",
-    customerId: "cust-004",
-    customerName: "Office Depot Inc",
-    items: [
-      {
-        productId: "prod-002",
-        productName: "Office Chair",
-        quantity: 15,
-        price: 249.99,
-        total: 3749.85,
-      },
-    ],
-    totalAmount: 3749.85,
-    status: "pending",
-    paymentStatus: "pending",
-    orderDate: "2025-11-15T11:30:00Z",
-    shippingAddress: "400 Office Blvd, Bronx, NY 10451",
-  },
-  {
-    id: "ord-005",
-    orderNumber: "ORD-2025-005",
-    customerId: "cust-005",
-    customerName: "Creative Studios",
-    items: [
-      {
-        productId: "prod-005",
-        productName: "Mechanical Keyboard",
-        quantity: 8,
-        price: 129.99,
-        total: 1039.92,
-      },
-    ],
-    totalAmount: 1039.92,
-    status: "delivered",
-    paymentStatus: "paid",
-    orderDate: "2025-11-08T14:00:00Z",
-    deliveryDate: "2025-11-12T10:30:00Z",
-    shippingAddress: "500 Creative Way, Staten Island, NY 10301",
-  },
-];
-
-export const mockSuppliers: Supplier[] = [
-  { id: "sup-1", supplierCode: "SUP0001", name: "Construction Supplies Co.", email: "contact@constructionsupplies.com", phone: "123-456-7890", address: "123 Industrial Rd", city: "Metropolis", country: "USA", productsSupplied: ["Cement", "Steel"], rating: 4.5, totalOrders: 150, status: "active", createdAt: "2024-01-01T10:00:00Z" },
-  { id: "sup-2", supplierCode: "SUP0002", name: "Global Building Materials", email: "sales@globalbuild.com", phone: "987-654-3210", address: "456 Commerce Blvd", city: "Gotham", country: "USA", productsSupplied: ["Bricks", "Sand"], rating: 4.0, totalOrders: 200, status: "active", createdAt: "2023-11-15T11:30:00Z" },
-  { id: "sup-3", supplierCode: "SUP0003", name: "Eco-Friendly Wood Inc.", email: "info@ecowood.com", phone: "555-111-2222", address: "789 Forest Lane", city: "Star City", country: "USA", productsSupplied: ["Timber", "Plywood"], rating: 4.8, totalOrders: 80, status: "active", createdAt: "2024-03-20T09:00:00Z" },
-  { id: "sup-4", supplierCode: "SUP0004", name: "Metal Fabricators Ltd.", email: "orders@metalfab.com", phone: "222-333-4444", address: "101 Steel Way", city: "Central City", country: "USA", productsSupplied: ["Steel Beams", "Rebar"], rating: 4.2, totalOrders: 120, status: "active", createdAt: "2024-02-10T14:00:00Z" },
-  { id: "sup-5", supplierCode: "SUP0005", name: "Tech Supplies Inc.", email: "contact@techsupplies.com", phone: "+1 555 100 2000", address: "500 Tech Park Drive", city: "San Francisco", country: "USA", productsSupplied: ["Electronics", "Accessories"], rating: 4.5, totalOrders: 45, status: "active", createdAt: "2024-01-15T00:00:00Z" },
-  { id: "sup-6", supplierCode: "SUP0006", name: "Furniture World", email: "sales@furnitureworld.com", phone: "+1 555 200 3000", address: "300 Furniture Lane", city: "Chicago", country: "USA", productsSupplied: ["Furniture"], rating: 4.2, totalOrders: 28, status: "active", createdAt: "2024-03-20T00:00:00Z" },
-  { id: "sup-7", supplierCode: "SUP0007", name: "Display Tech Ltd.", email: "info@displaytech.com", phone: "+1 555 300 4000", address: "700 Monitor Boulevard", city: "Austin", country: "USA", productsSupplied: ["Electronics", "Displays"], rating: 4.8, totalOrders: 32, status: "active", createdAt: "2024-05-10T00:00:00Z" },
-];
-
-export const mockInventory: InventoryItem[] = [
-  {
-    id: "inv-001",
-    name: "Laptop Computer",
-    sku: "LPT-2024-001",
-    category: "Electronics",
-    quantity: 45,
-    price: 1299.99,
-    reorderLevel: 10,
-    supplier: "Tech Supplies Inc.",
-    lastUpdated: "2025-11-10T10:30:00Z",
-    status: "in-stock",
-  },
-  {
-    id: "inv-002",
-    name: "Office Chair",
-    sku: "CHR-2024-002",
-    category: "Furniture",
-    quantity: 8,
-    price: 249.99,
-    reorderLevel: 15,
-    supplier: "Furniture World",
-    lastUpdated: "2025-11-12T14:20:00Z",
-    status: "low-stock",
-  },
-  {
-    id: "inv-003",
-    name: "Wireless Mouse",
-    sku: "MSE-2024-003",
-    category: "Accessories",
-    quantity: 120,
-    price: 29.99,
-    reorderLevel: 30,
-    supplier: "Tech Supplies Inc.",
-    lastUpdated: "2025-11-14T09:15:00Z",
-    status: "in-stock",
-  },
-  {
-    id: "inv-004",
-    name: "4K Monitor",
-    sku: "MON-2024-004",
-    category: "Electronics",
-    quantity: 32,
-    price: 449.99,
-    reorderLevel: 20,
-    supplier: "Display Tech Ltd.",
-    lastUpdated: "2025-11-15T11:00:00Z",
-    status: "in-stock",
-  },
-  {
-    id: "inv-005",
-    name: "Mechanical Keyboard",
-    sku: "KBD-2024-005",
-    category: "Accessories",
-    quantity: 67,
-    price: 129.99,
-    reorderLevel: 25,
-    supplier: "Tech Supplies Inc.",
-    lastUpdated: "2025-11-15T13:45:00Z",
-    status: "in-stock",
-  },
-  {
-    id: "inv-006",
-    name: "Standing Desk",
-    sku: "DSK-2024-006",
-    category: "Furniture",
-    quantity: 5,
-    price: 599.99,
-    reorderLevel: 10,
-    supplier: "Furniture World",
-    lastUpdated: "2025-11-15T15:20:00Z",
-    status: "low-stock",
-  },
-  {
-    id: "inv-007",
-    name: "Webcam HD",
-    sku: "WBC-2024-007",
-    category: "Electronics",
-    quantity: 89,
-    price: 79.99,
-    reorderLevel: 40,
-    supplier: "Tech Supplies Inc.",
-    lastUpdated: "2025-11-15T09:30:00Z",
-    status: "in-stock",
-  },
-  {
-    id: "inv-008",
-    name: "Desk Lamp LED",
-    sku: "LMP-2024-008",
-    category: "Accessories",
-    quantity: 0,
-    price: 39.99,
-    reorderLevel: 50,
-    supplier: "Furniture World",
-    lastUpdated: "2025-11-15T10:15:00Z",
-    status: "out-of-stock",
-  },
-];
-
-export const mockPurchases: Purchase[] = [
-  {
-    id: "PR-00002",
-    itemId: "inv-001",
-    itemName: "Cloth",
-    quantity: 20,
-    totalPrice: 1551,
-    supplier: "Cloth Supplier",
-    purchaseDate: "2021-03-12T00:00:00Z",
-    status: "completed",
-    orderBy: "Joan Dyer",
-    paid: 1500,
-    balance: 51,
-    paymentStatus: "partial",
-    purchaseStatus: "item-received",
-  },
-  {
-    id: "PR-00004",
-    itemId: "inv-002",
-    itemName: "Cycle",
-    quantity: 15,
-    totalPrice: 1551,
-    supplier: "Toy Supplier",
-    purchaseDate: "2021-03-16T00:00:00Z",
-    status: "completed",
-    orderBy: "Phil Glover",
-    paid: 1500,
-    balance: 51,
-    paymentStatus: "partial",
-    purchaseStatus: "item-received",
-  },
-  {
-    id: "PR-00006",
-    itemId: "inv-003",
-    itemName: "Shoes",
-    quantity: 30,
-    totalPrice: 1551,
-    supplier: "Footwear Supplier",
-    purchaseDate: "2021-03-12T00:00:00Z",
-    status: "completed",
-    orderBy: "Ryan Randall",
-    paid: 1500,
-    balance: 51,
-    paymentStatus: "partial",
-    purchaseStatus: "item-received",
-  },
-];
-
-export const mockStockMovements: StockMovement[] = [
-  {
-    id: "stk-001",
-    itemId: "inv-001",
-    itemName: "Laptop Computer",
-    type: "in",
-    quantity: 20,
-    date: "2025-11-01T10:30:00Z",
-    reason: "Purchase Order #PR-00002",
-    performedBy: "Admin User",
-  },
-  {
-    id: "stk-002",
-    itemId: "inv-001",
-    itemName: "Laptop Computer",
-    type: "out",
-    quantity: 5,
-    date: "2025-11-03T14:15:00Z",
-    reason: "Sales Order #SO-123",
-    performedBy: "Sales Team",
-  },
-];
-
-export const mockPurchaseInvoices: PurchaseInvoice[] = [
-  {
-    id: "PI001",
-    invoiceNumber: "INV-2023-001",
-    supplierName: "Supplier A",
-    purchaseDate: "2023-10-20",
-    items: [
-      { id: "ITEM001", name: "Laptop", purchasedQuantity: 5, returnedQuantity: 0, unitPrice: 1200, scaled: false },
-      { id: "ITEM002", name: "Mouse", purchasedQuantity: 10, returnedQuantity: 0, unitPrice: 25, scaled: true },
-      { id: "ITEM003", name: "Keyboard", purchasedQuantity: 8, returnedQuantity: 0, unitPrice: 75, scaled: false },
-    ],
-  },
-  {
-    id: "PI002",
-    invoiceNumber: "INV-2023-002",
-    supplierName: "Supplier B",
-    purchaseDate: "2023-10-25",
-    items: [
-      { id: "ITEM004", name: "Monitor", purchasedQuantity: 3, returnedQuantity: 0, unitPrice: 300, scaled: false },
-      { id: "ITEM005", name: "Webcam", purchasedQuantity: 7, returnedQuantity: 0, unitPrice: 50, scaled: false },
-      { id: "ITEM008", name: "USB Hub", purchasedQuantity: 4, returnedQuantity: 0, unitPrice: 30, scaled: true },
-    ],
   },
 ];

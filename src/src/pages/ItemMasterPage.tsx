@@ -92,6 +92,7 @@ export const ItemMasterPage: React.FC = () => {
   const handleEditClick = (item: Item) => {
     setSelectedItem(item);
     setFormData(item);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelEdit = () => {
@@ -100,7 +101,7 @@ export const ItemMasterPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* Add/Edit Form */}
 <motion.div
   initial={{ opacity: 0, y: -20, height: 0 }}
@@ -312,7 +313,7 @@ export const ItemMasterPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-1">{item.productName}</td>
                   <td className="px-6 py-1">{item.qty}</td>
-                  <td className="px-6 py-1">${item.price.toFixed(2)}</td>
+                  <td className="px-6 py-1">₹{item.price.toFixed(2)}</td>
                   <td className="px-6 py-1">{item.batchNo}</td>
                   <td className="px-6 py-1">
                     {item.expiryDate

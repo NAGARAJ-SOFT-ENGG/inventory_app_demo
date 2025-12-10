@@ -46,7 +46,7 @@ export const Employees: React.FC = () => {
       e.phone,
       e.role,
       e.department,
-      `$${e.salary.toLocaleString()}`,
+      `₹${e.salary.toLocaleString()}`,
       e.status.toUpperCase(),
     ]);
     generatePDF("Employees Report", headers, data, "employees-report.pdf");
@@ -185,7 +185,7 @@ export const Employees: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-600">{employee.phone}</td>
-                  <td className="px-6 py-4 text-gray-900">${employee.salary.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-gray-900">₹{employee.salary.toLocaleString()}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs border ${

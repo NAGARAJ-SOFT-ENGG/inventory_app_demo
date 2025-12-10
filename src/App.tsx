@@ -10,10 +10,10 @@ import { LoginPage } from "./src/components/LoginPage";
 import { Layout } from "./src/components/Layout";
 import { ProtectedRoute } from "./src/routes/ProtectedRoute";
 import { Dashboard } from "./src/pages/Dashboard";
-import { Products } from "./src/pages/Products";
+// import { Products } from "./src/pages/Products";
 import { Inventory } from "./src/pages/Inventory";
-import { Sales } from "./src/pages/Sales";
-import { Orders } from "./src/pages/Orders";
+// import { Sales } from "./src/pages/Sales";
+// import { Orders } from "./src/pages/Orders";
 import { Purchases } from "./src/pages/Purchases";
 import { Suppliers } from "./src/pages/Suppliers";
 import { Employees } from "./src/pages/Employees";
@@ -73,14 +73,14 @@ const AppRoutes: React.FC = () => {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
+        {/* <Route path="products" element={<Products />} /> */}
         <Route path="inventory" element={<Inventory />} />
         {/* <Route path="inventory" element={<Inventory />} /> */}
         <Route path="/po-screen" element={<POScreen />} />
         <Route path="/scales-screen" element={<ScalesScreen />} />
         <Route path="/reports" element={<ReportsPage />} />
-        <Route path="sales" element={<Sales />} />
-        <Route path="orders" element={<Orders />} />
+        {/* <Route path="sales" element={<Sales />} /> */}
+        {/* <Route path="orders" element={<Orders />} /> */}
         <Route
           path="purchases"
           element={

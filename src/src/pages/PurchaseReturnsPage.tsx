@@ -126,7 +126,7 @@ export const PurchaseReturnsPage: React.FC = () => {
       )
     );
 
-    toast.success(`Purchase return processed for invoice ${selectedInvoice.invoiceNumber}. Total amount: $${totalReturnAmount.toFixed(2)}`);
+    toast.success(`Purchase return processed for invoice ${selectedInvoice.invoiceNumber}. Total amount: ₹${totalReturnAmount.toFixed(2)}`);
     setSelectedInvoice(null); // Clear selection after return
     setReturnQuantities({});
   };
@@ -207,7 +207,7 @@ export const PurchaseReturnsPage: React.FC = () => {
                     <td className="py-2 px-4 border-b text-sm text-gray-800">{item.name}</td>
                     <td className="py-2 px-4 border-b text-sm text-gray-800">{item.purchasedQuantity}</td>
                     <td className="py-2 px-4 border-b text-sm text-gray-800">{item.returnedQuantity}</td>
-                    <td className="py-2 px-4 border-b text-sm text-gray-800">${item.unitPrice.toFixed(2)}</td>
+                    <td className="py-2 px-4 border-b text-sm text-gray-800">₹{item.unitPrice.toFixed(2)}</td>
                     <td className="py-2 px-4 border-b text-sm text-gray-800">{stock[item.id] || 0}</td>
                     <td className="py-2 px-4 border-b text-sm text-gray-800">
                       {item.scaled ? <span className="text-red-500">Yes</span> : <span className="text-green-500">No</span>}

@@ -1,234 +1,4 @@
-// import React, { useState } from "react";
-// import { motion } from "framer-motion";
-// import { Search, Plus, Edit, Trash2, Printer } from "lucide-react";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogFooter,
-// } from "../../components/ui/dialog"; 
-// import { mockProducts, mockSuppliers, mockScalesItems } from "../data/mockData";
-// import { ScalesItem } from "../models/scales.model";
-// import { Label } from "../../components/ui/label";
-// import { Input } from "../../components/ui/input";
-// import { Button } from "../../components/ui/button";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "../../components/ui/select";
-// import { getCurrentDateTime } from "../utils/dateUtils";
-
-// // Mock data for dropdowns, assuming these are from your master files
-// const mockQuantities = [
-//   { id: 1, unit: 'Ton', value: 1000 },
-//   { id: 2, unit: 'Kg', value: 1 },
-//   { id: 3, unit: '25 bag', value: 25 },
-//   { id: 4, unit: '50 bag', value: 50 },
-// ];
-
-// const mockPrices = [
-//     { id: 1, name: 'Cement Bag Price', value: 350 },
-//     { id: 2, name: 'Steel Ton Price', value: 55000 },
-// ];
-
-// const ScalesScreen = () => {
-//   const [scalesItems, setScalesItems] = useState<ScalesItem[]>(mockScalesItems);
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-//   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-//   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-//   const [selectedScalesItem, setSelectedScalesItem] = useState<ScalesItem | null>(null);
-//   const [formData, setFormData] = useState<Partial<ScalesItem>>({});
-
-//   const filteredScalesItems = scalesItems.filter(
-//     (item) =>
-//       item.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       item.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       item.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase())
-//   );
-
-//   const handleAdd = () => {
-//     const newItem: ScalesItem = {
-//       id: `scale-${Date.now()}`,
-//       supplierName: formData.supplierName || "",
-//       productName: formData.productName || "",
-//       qty: formData.qty || 0,
-//       price: formData.price || 0,
-//       date: formData.date || new Date().toISOString().split('T')[0],
-//       time: formData.time || new Date().toTimeString().split(' ')[0].substring(0,5),
-//       vehicleNumber: formData.vehicleNumber || "",
-//       transportName: formData.transportName || "",
-//       driverName: formData.driverName || "",
-//       mobileNumber: formData.mobileNumber || "",
-//     };
-//     setScalesItems([newItem, ...scalesItems]);
-//     setIsAddDialogOpen(false);
-//     setFormData({});
-//   };
-
-//   const handleEdit = () => {
-//     if (selectedScalesItem) {
-//       setScalesItems(
-//         scalesItems.map((item) =>
-//           item.id === selectedScalesItem.id ? { ...item, ...formData } : item
-//         )
-//       );
-//       setIsEditDialogOpen(false);
-//       setSelectedScalesItem(null);
-//       setFormData({});
-//     }
-//   };
-
-//   const handleDelete = () => {
-//     if (selectedScalesItem) {
-//       setScalesItems(scalesItems.filter((item) => item.id !== selectedScalesItem.id));
-//       setIsDeleteDialogOpen(false);
-//       setSelectedScalesItem(null);
-//     }
-//   };
-
-//   const openEditDialog = (item: ScalesItem) => {
-//     setSelectedScalesItem(item);
-//     setFormData(item);
-//     setIsEditDialogOpen(true);
-//   };
-
-//   const handlePrint = (item: ScalesItem) => {
-//     const printContent = `
-//       <h2>Scales Receipt</h2>
-//       <p><strong>Supplier:</strong> ${item.supplierName}</p>
-//       <p><strong>Product:</strong> ${item.productName}</p>
-//       <p><strong>Quantity:</strong> ${item.qty}</p>
-//       <p><strong>Price:</strong> ${item.price}</p>
-//       <p><strong>Date:</strong> ${item.date} ${item.time}</p>
-//       <p><strong>Vehicle:</strong> ${item.vehicleNumber}</p>
-//       <p><strong>Transport:</strong> ${item.transportName}</p>
-//       <p><strong>Driver:</strong> ${item.driverName} (${item.mobileNumber})</p>
-//     `;
-//     const printWindow = window.open('', '', 'height=400,width=600');
-//     if (printWindow) {
-//       printWindow.document.write(printContent);
-//       printWindow.document.close();
-//       printWindow.focus();
-//       printWindow.print();
-//       // As per requirement for 2 copies
-//       printWindow.print();
-//       printWindow.close();
-//     }
-//   };
-
-//   return (
-//     <div className="space-y-6">
-//       {/* Header */}
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-//         <div>
-//           <h2 className="text-gray-900 mb-2">Scales Screen</h2>
-//           <p className="text-gray-600">Manage your scales entries</p>
-//         </div>
-//         <Button onClick={() => {
-//           const { date, time } = getCurrentDateTime();
-//           setFormData({ date, time });
-//           setIsAddDialogOpen(true);
-//         }} variant="gradient" size="lg">
-//           <Plus className="w-5 h-5 mr-2" />
-//           <span>Add Entry</span>
-//         </Button>
-//       </div>
-
-//       {/* Search */}
-//       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-//         <div className="relative">
-//           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-//           <Input
-//             type="text"
-//             placeholder="Search by supplier, product, driver..."
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="w-full pl-10"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Scales Table */}
-//       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-//         <div className="overflow-x-auto">
-//           <table className="w-full">
-//             <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-//               <tr>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Supplier</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Product</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Qty</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Price</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Date & Time</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Vehicle No.</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Driver</th>
-//                 <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody className="divide-y divide-gray-200">
-//               {filteredScalesItems.map((item, index) => (
-//                 <motion.tr key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} className="hover:bg-blue-50 transition-colors">
-//                   <td className="px-6 py-4 text-gray-900">{item.supplierName}</td>
-//                   <td className="px-6 py-4 text-gray-600">{item.productName}</td>
-//                   <td className="px-6 py-4 text-gray-600">{item.qty}</td>
-//                   <td className="px-6 py-4 text-gray-600">${item.price.toFixed(2)}</td>
-//                   <td className="px-6 py-4 text-gray-600">{item.date} @ {item.time}</td>
-//                   <td className="px-6 py-4 text-gray-600">{item.vehicleNumber}</td>
-//                   <td className="px-6 py-4 text-gray-600">{item.driverName} ({item.mobileNumber})</td>
-//                   <td className="px-6 py-4">
-//                     <div className="flex items-center gap-2">
-//                       <Button variant="ghost" size="icon" onClick={() => handlePrint(item)} className="text-gray-600 hover:bg-gray-100"><Printer className="w-4 h-4" /></Button>
-//                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button>
-//                       <Button variant="ghost" size="icon" onClick={() => { setSelectedScalesItem(item); setIsDeleteDialogOpen(true); }} className="text-red-600 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button>
 //                     </div>
-//                   </td>
-//                 </motion.tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       {/* Add/Edit Dialog */}
-//       <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={(open) => { if (!open) { setIsAddDialogOpen(false); setIsEditDialogOpen(false); } }}>
-//         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-//           <DialogHeader><DialogTitle>{isAddDialogOpen ? 'Add Scales Entry' : 'Edit Scales Entry'}</DialogTitle></DialogHeader>
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-//             <div className="space-y-2"><Label>Supplier Name</Label><Select value={formData.supplierName} onValueChange={(value) => setFormData({ ...formData, supplierName: value })}><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger><SelectContent>{mockSuppliers.map(s => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}</SelectContent></Select></div>
-//             <div className="space-y-2"><Label>Product Name</Label><Select value={formData.productName} onValueChange={(value) => setFormData({ ...formData, productName: value })}><SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger><SelectContent>{mockProducts.map(p => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-//             <div className="space-y-2"><Label>Quantity</Label><Select value={formData.qty?.toString()} onValueChange={(value) => setFormData({ ...formData, qty: parseInt(value) })}><SelectTrigger><SelectValue placeholder="Select quantity" /></SelectTrigger><SelectContent>{mockQuantities.map(q => <SelectItem key={q.id} value={q.value.toString()}>{q.unit} ({q.value})</SelectItem>)}</SelectContent></Select></div>
-//             <div className="space-y-2"><Label>Price</Label><Select value={formData.price?.toString()} onValueChange={(value) => setFormData({ ...formData, price: parseFloat(value) })}><SelectTrigger><SelectValue placeholder="Select master price" /></SelectTrigger><SelectContent>{mockPrices.map(p => <SelectItem key={p.id} value={p.value.toString()}>{p.name} (${p.value})</SelectItem>)}</SelectContent></Select></div>
-//             <div className="space-y-2 md:col-span-2"><Label>Or Enter Price (Free Text)</Label><Input type="number" placeholder="Enter custom price" value={formData.price || ''} onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })} /></div>
-//             <div className="space-y-2"><Label>Date</Label><Input type="date" value={formData.date || ''} onChange={(e) => setFormData({ ...formData, date: e.target.value })} /></div>
-//             <div className="space-y-2"><Label>Time</Label><Input type="time" value={formData.time || ''} onChange={(e) => setFormData({ ...formData, time: e.target.value })} /></div>
-//             <div className="space-y-2"><Label>Vehicle Number</Label><Input value={formData.vehicleNumber || ''} onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })} /></div>
-//             <div className="space-y-2"><Label>Transport Name</Label><Input value={formData.transportName || ''} onChange={(e) => setFormData({ ...formData, transportName: e.target.value })} /></div>
-//             <div className="space-y-2"><Label>Driver Name</Label><Input value={formData.driverName || ''} onChange={(e) => setFormData({ ...formData, driverName: e.target.value })} /></div>
-//             <div className="space-y-2"><Label>Mobile Number</Label><Input value={formData.mobileNumber || ''} onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })} /></div>
-//           </div>
-//           <DialogFooter><Button variant="gradient" size="lg" onClick={isAddDialogOpen ? handleAdd : handleEdit}>{isAddDialogOpen ? 'Add Entry' : 'Save Changes'}</Button></DialogFooter>
-//         </DialogContent>
-//       </Dialog>
-
-//       {/* Delete Confirmation Dialog */}
-//       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-//         <DialogContent>
-//           <DialogHeader><DialogTitle>Delete Scales Entry</DialogTitle></DialogHeader>
-//           <p>Are you sure you want to delete the entry for "{selectedScalesItem?.productName}" from "{selectedScalesItem?.supplierName}"?</p>
-//           <DialogFooter><Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button><Button variant="destructive" onClick={handleDelete}>Delete</Button></DialogFooter>
-//         </DialogContent>
-//       </Dialog>
-//     </div>
-//   );
-// };
-
-// export default ScalesScreen;
-
 import React, { useState, useEffect } from "react";
 import { 
   X, 
@@ -236,9 +6,12 @@ import {
   ScanBarcode, 
   ChevronDown, 
   Trash2,
-  Printer
+  Printer,
+  Edit,
+  Search
 } from "lucide-react"; 
-import { mockItems, mockQuantities, mockSuppliers } from "../data/mockData";
+import { motion } from "motion/react";
+import { mockItems, mockScalesItems, mockSuppliers } from "../data/mockData";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -252,7 +25,9 @@ import {
   DialogFooter,
 } from "../../components/ui/dialog";
 import { Textarea } from "../../components/ui/textarea";
+import { Card, CardContent } from "../../components/ui/card";
 import { generatePurchaseInvoicePDF } from "../utils/purchaseInvoiceGenerator";
+import jsPDF from "jspdf";
 
 
 // --- MAIN COMPONENT ---
@@ -263,9 +38,22 @@ const ScalesScreen = () => {
     // { id: 1, name: "POPCORN T-SHIRT", description: "", hsn: "", qty: 1, unit: "PCS", price: 350, discount: 0, tax: 0, amount: 350 }
   ]);
 
+  const [scalesEntries, setScalesEntries] = useState(mockScalesItems);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isSaveConfirmationDialogOpen, setIsSaveConfirmationDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedScaleEntry, setSelectedScaleEntry] = useState<any | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [view, setView] = useState<'desktop' | 'mobile'>('desktop');
+
+  const filteredScalesEntries = scalesEntries.filter(
+    (item) =>
+      (item.supplierName && item.supplierName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.productName && item.productName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.driverName && item.driverName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.vehicleNumber && item.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -275,6 +63,22 @@ const ScalesScreen = () => {
     handleResize(); // Set initial view
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const initialGlobalState = {
+    invoiceNo: "1",
+    date: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    supplierName: "Walk in",
+    paymentTerms: "30",
+    roundOff: 0,
+    termsVisible: true,
+    payments: [{ mode: "Cash", amount: 0 }],
+    discountType: 'Percentage',
+    discountValue: 0,
+    vehicleNumber: "",
+    driverName: "",
+    driverMobileNumber: "",
+  };
 
   const [globalState, setGlobalState] = useState({
     invoiceNo: "1",
@@ -367,6 +171,14 @@ const ScalesScreen = () => {
     setItems(items.filter(i => i.id !== id));
   };
 
+  const handleDeleteEntry = () => {
+    if (selectedScaleEntry) {
+      setScalesEntries(scalesEntries.filter((item) => item.id !== selectedScaleEntry.id));
+      setIsDeleteDialogOpen(false);
+      setSelectedScaleEntry(null);
+    }
+  };
+
   const updateItem = (id, field, value) => {
     setItems(items.map((item) => {
       if (item.id === id && field === 'name') {
@@ -414,9 +226,40 @@ const ScalesScreen = () => {
     setIsSaveConfirmationDialogOpen(true);
   };
 
+  const handleEditScaleEntry = (entryToEdit: any) => {
+    // Set the form state with the data from the selected entry
+    setGlobalState({
+      ...globalState, // keep some defaults if needed
+      invoiceNo: entryToEdit.globalState.invoiceNo,
+      date: entryToEdit.globalState.date,
+      dueDate: entryToEdit.globalState.dueDate,
+      supplierName: entryToEdit.supplier.name,
+      payments: entryToEdit.globalState.payments || [{ mode: "Cash", amount: entryToEdit.globalState.amountPaid || 0 }],
+      vehicleNumber: entryToEdit.vehicleNumber || "",
+      driverName: entryToEdit.driverName || "",
+      driverMobileNumber: entryToEdit.mobileNumber || "",
+    });
+
+    // The items in mock data might have string percentages for tax/discount, convert them for the form
+    const formItems = entryToEdit.items.map((item: any) => ({
+      ...item,
+      tax: parseFloat(item.tax) || 0,
+      discount: parseFloat(item.discount) || 0,
+    }));
+
+    setItems(formItems);
+    setEditingId(entryToEdit.globalState.invoiceNo); // Track the ID of the item being edited
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see the form
+  };
+
+  const handleClearForm = () => {
+    setItems([]);
+    setGlobalState(initialGlobalState);
+    setEditingId(null);
+  };
+
   return (
-    <>
-      
+    <div className="space-y-6">
       <div id="printable-invoice" className="max-w-[1600px] mx-auto p-0 space-y-4">
         
         {/* --- MAIN FORM CARD --- */}
@@ -635,14 +478,73 @@ const ScalesScreen = () => {
             </div>
           </div>
             </div>
-                      <div className="w-full p-4 border-t border-gray-200 bg-white flex flex-row justify-end print-hide">
-            <Button variant="gradient" className="py-2" onClick={handleSave}>
-              Save Scales Entry
-            </Button>
+          <div className="w-full p-4 border-t border-gray-200 bg-white flex flex-row justify-end gap-3 print-hide">
+              <Button variant="outline" className="py-2" onClick={handleClearForm}>
+                <X className="w-4 h-4 mr-2" /> Clear Form
+              </Button>
+              <Button variant="gradient" className="py-2" onClick={handleSave}>
+                {editingId ? 'Update Entry' : 'Save Scales Entry'}
+              </Button>
           </div>
           </div>
         </div>
   
+      {/* Search Bar */}
+      <Card className="p-2 w-full max-w-[1600px] mx-auto">
+        <CardContent className="flex items-center gap-2 p-0">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search by supplier, product, driver..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Scales Table */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-[1600px] mx-auto">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Invoice No</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Items</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Total</th>
+                <th className="px-6 py-4 text-left text-xs uppercase tracking-wider">Date & Time</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredScalesEntries.map((item, index) => (
+                <motion.tr key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} className="hover:bg-blue-50 transition-colors">
+                  <td className="px-6 py-1">
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEditScaleEntry(item)} className="text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        disabled={editingId === item.globalState.invoiceNo}
+                        onClick={() => { setSelectedScaleEntry(item); setIsDeleteDialogOpen(true); }} 
+                        className="text-red-600 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-gray-900">{item.globalState.invoiceNo}</td>
+                  <td className="px-6 py-4 text-gray-900">{item.supplier.name}</td>
+                  <td className="px-6 py-4 text-gray-600">{item.items?.length ?? 0}</td>
+                  <td className="px-6 py-4 text-gray-900">₹{(item.totals.total ?? 0).toFixed(2)}</td>
+                  <td className="px-6 py-4 text-gray-600">{item.globalState.date}</td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Save Confirmation Dialog */}
       <Dialog open={isSaveConfirmationDialogOpen} onOpenChange={setIsSaveConfirmationDialogOpen}>
         <DialogContent>
@@ -671,7 +573,21 @@ const ScalesScreen = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Delete Scales Entry</DialogTitle></DialogHeader>
+          <div className="p-6 pt-0">
+            <p>Are you sure you want to delete the entry for "{selectedScaleEntry?.productName}" from "{selectedScaleEntry?.supplierName}"?</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteEntry}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

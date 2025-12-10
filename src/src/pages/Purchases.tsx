@@ -64,8 +64,8 @@ export const Purchases: React.FC = () => {
       p.orderBy,
       new Date(p.purchaseDate).toLocaleDateString(),
       p.supplier,
-      `$${p.totalPrice}`,
-      `$${p.paid}`,
+      `₹${p.totalPrice}`,
+      `₹${p.paid}`,
     ]);
     generatePDF("Purchase Items Report", headers, data, "purchases-report.pdf");
   };
